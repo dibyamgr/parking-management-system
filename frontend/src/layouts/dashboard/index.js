@@ -1,8 +1,12 @@
+import React from "react";
+
+// @mui material components
 import Grid from "@mui/material/Grid";
 
-// React components
+// ParkSmart React components
 import MDBox from "components/MDBox";
 
+// ParkSmart examples components
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
@@ -10,81 +14,35 @@ import ReportsBarChart from "examples/Charts/BarCharts/ReportsBarChart";
 import ReportsLineChart from "examples/Charts/LineCharts/ReportsLineChart";
 import ComplexStatisticsCard from "examples/Cards/StatisticsCards/ComplexStatisticsCard";
 
-// Data
-import reportsBarChartData from "layouts/dashboard/data/reportsBarChartData";
-import reportsLineChartData from "layouts/dashboard/data/reportsLineChartData";
+// ParkSmart Data for dashboard
+import parksmartStatisticsData from "layouts/dashboard/data/parksmartStatisticsData";
+import parksmartChartsData from "layouts/dashboard/data/parksmartChartsData";
 
-// Dashboard components
-import Projects from "layouts/dashboard/components/Projects";
-import OrdersOverview from "layouts/dashboard/components/OrdersOverview";
+// ParkSmart dashboard components
+import RecentParkingActivity from "layouts/dashboard/components/RecentParkingActivity";
+import ParkingZoneOccupancy from "layouts/dashboard/components/ParkingZoneOccupancy";
 
 function Dashboard() {
-  const { sales, tasks } = reportsLineChartData;
+  const { parkingSessionsChart, revenueTrendChart, newUsersChart } = parksmartChartsData;
 
   return (
     <DashboardLayout>
       <DashboardNavbar />
       <MDBox py={3}>
         <Grid container spacing={3}>
-          <Grid item xs={12} md={6} lg={3}>
-            <MDBox mb={1.5}>
-              <ComplexStatisticsCard
-                color="dark"
-                icon="weekend"
-                title="Bookings"
-                count={281}
-                percentage={{
-                  color: "success",
-                  amount: "+55%",
-                  label: "than lask week",
-                }}
-              />
-            </MDBox>
-          </Grid>
-          <Grid item xs={12} md={6} lg={3}>
-            <MDBox mb={1.5}>
-              <ComplexStatisticsCard
-                icon="leaderboard"
-                title="Today's Users"
-                count="2,300"
-                percentage={{
-                  color: "success",
-                  amount: "+3%",
-                  label: "than last month",
-                }}
-              />
-            </MDBox>
-          </Grid>
-          <Grid item xs={12} md={6} lg={3}>
-            <MDBox mb={1.5}>
-              <ComplexStatisticsCard
-                color="success"
-                icon="store"
-                title="Revenue"
-                count="34k"
-                percentage={{
-                  color: "success",
-                  amount: "+1%",
-                  label: "than yesterday",
-                }}
-              />
-            </MDBox>
-          </Grid>
-          <Grid item xs={12} md={6} lg={3}>
-            <MDBox mb={1.5}>
-              <ComplexStatisticsCard
-                color="primary"
-                icon="person_add"
-                title="Followers"
-                count="+91"
-                percentage={{
-                  color: "success",
-                  amount: "",
-                  label: "Just updated",
-                }}
-              />
-            </MDBox>
-          </Grid>
+          {parksmartStatisticsData.map((data, index) => (
+            <Grid item xs={12} md={6} lg={3} key={index}>
+              <MDBox mb={1.5}>
+                <ComplexStatisticsCard
+                  color={data.color}
+                  icon={data.icon}
+                  title={data.title}
+                  count={data.count}
+                  percentage={data.percentage}
+                />
+              </MDBox>
+            </Grid>
+          ))}
         </Grid>
         <MDBox mt={4.5}>
           <Grid container spacing={3}>
@@ -92,10 +50,10 @@ function Dashboard() {
               <MDBox mb={3}>
                 <ReportsBarChart
                   color="info"
-                  title="website views"
-                  description="Last Campaign Performance"
-                  date="campaign sent 2 days ago"
-                  chart={reportsBarChartData}
+                  title="Daily Parking Sessions"
+                  description="Overview of sessions per day"
+                  date="updated hourly"
+                  chart={parkingSessionsChart}
                 />
               </MDBox>
             </Grid>
@@ -103,14 +61,14 @@ function Dashboard() {
               <MDBox mb={3}>
                 <ReportsLineChart
                   color="success"
-                  title="daily sales"
+                  title="Revenue Trend"
                   description={
                     <>
-                      (<strong>+15%</strong>) increase in today sales.
+                      (<strong>+15%</strong>) increase in revenue this week.
                     </>
                   }
-                  date="updated 4 min ago"
-                  chart={sales}
+                  date="last updated 4 min ago"
+                  chart={revenueTrendChart}
                 />
               </MDBox>
             </Grid>
@@ -118,10 +76,10 @@ function Dashboard() {
               <MDBox mb={3}>
                 <ReportsLineChart
                   color="dark"
-                  title="completed tasks"
-                  description="Last Campaign Performance"
+                  title="New User Registrations"
+                  description="Monthly trend for new sign-ups"
                   date="just updated"
-                  chart={tasks}
+                  chart={newUsersChart}
                 />
               </MDBox>
             </Grid>
@@ -130,10 +88,10 @@ function Dashboard() {
         <MDBox>
           <Grid container spacing={3}>
             <Grid item xs={12} md={6} lg={8}>
-              <Projects />
+              <RecentParkingActivity />
             </Grid>
             <Grid item xs={12} md={6} lg={4}>
-              <OrdersOverview />
+              <ParkingZoneOccupancy />
             </Grid>
           </Grid>
         </MDBox>
