@@ -7,7 +7,7 @@ Coded by Dibya Rani Saru Magar (202487865) and Irin Sultana ()
 */
 
 import Dashboard from "layouts/dashboard";
-import Tables from "layouts/tables";
+import Users from "layouts/users";
 import Billing from "layouts/billing";
 import RTL from "layouts/rtl";
 import Notifications from "layouts/notifications";
@@ -43,7 +43,7 @@ const routes = [
     key: "users",
     icon: <PeopleIcon fontSize="small" />,
     route: "/users",
-    component: <Tables />,
+    component: <Users />,
   },
   {
     type: "collapse",
