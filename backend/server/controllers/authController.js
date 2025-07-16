@@ -151,10 +151,28 @@ const logoutUser = async (req, res) => {
   }
 };
 
+const getAllUsers = async (req, res) => {
+  const { authorization } = req.headers;
+  if (!authorization) {
+    return res.status(401).json({ message: "No token, authorization denied" });
+  }
+
+  try {
+    const users = await User.find().select("-password").lean();
+    if (!users) {
+      return res.status(404).json({ message: "Users List not found" });
+    }
+    res.json(users);
+  } catch (error) {
+    return res.status(401).json({ message: "Token is not valid" });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   getUserProfile,
   logoutUser,
   updateUserProfile,
+  getAllUsers,
 };
