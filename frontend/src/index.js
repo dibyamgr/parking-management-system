@@ -1,11 +1,17 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App'; // This is your main App component
-import './index.css'; // Optional: for global styles
+import React from "react";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import App from "App";
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+import { AppControllerProvider } from "context";
+
+const container = document.getElementById("app");
+const root = createRoot(container);
+
 root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+  <BrowserRouter>
+    <AppControllerProvider>
+      <App />
+    </AppControllerProvider>
+  </BrowserRouter>
 );
