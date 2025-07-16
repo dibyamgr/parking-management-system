@@ -15,72 +15,109 @@ import Profile from "layouts/profile";
 import SignIn from "layouts/authentication/sign-in";
 import SignUp from "layouts/authentication/sign-up";
 
-import Icon from "@mui/material/Icon";
+import SpaceDashboardIcon from "@mui/icons-material/SpaceDashboard";
+import PeopleIcon from "@mui/icons-material/People";
+import MapIcon from "@mui/icons-material/Map";
+import LocalParkingIcon from "@mui/icons-material/LocalParking";
+import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import LogoutIcon from "@mui/icons-material/Logout";
+import ListAltIcon from "@mui/icons-material/ListAlt";
+import SettingsIcon from "@mui/icons-material/Settings";
 
 const routes = [
   {
     type: "collapse",
     name: "Dashboard",
     key: "dashboard",
-    icon: <Icon fontSize="small">dashboard</Icon>,
+    icon: <SpaceDashboardIcon fontSize="small" />,
     route: "/dashboard",
     component: <Dashboard />,
   },
+  { type: "divider", key: "management-divider" },
   {
     type: "collapse",
-    name: "Tables",
-    key: "tables",
-    icon: <Icon fontSize="small">table_view</Icon>,
-    route: "/tables",
+    name: "Users",
+    key: "users",
+    icon: <PeopleIcon fontSize="small" />,
+    route: "/users",
     component: <Tables />,
   },
   {
     type: "collapse",
-    name: "Billing",
-    key: "billing",
-    icon: <Icon fontSize="small">receipt_long</Icon>,
-    route: "/billing",
+    name: "Parking Zones",
+    key: "parking-zones",
+    icon: <MapIcon fontSize="small" />,
+    route: "/parking-zones",
     component: <Billing />,
   },
   {
     type: "collapse",
-    name: "RTL",
-    key: "rtl",
-    icon: <Icon fontSize="small">format_textdirection_r_to_l</Icon>,
-    route: "/rtl",
+    name: "Parking Slots",
+    key: "parking-slots",
+    icon: <LocalParkingIcon fontSize="small" />,
+    route: "/parking-slots",
     component: <RTL />,
   },
   {
     type: "collapse",
-    name: "Notifications",
-    key: "notifications",
-    icon: <Icon fontSize="small">notifications</Icon>,
-    route: "/notifications",
+    name: "Vehicles",
+    key: "vehicles",
+    icon: <DirectionsCarIcon fontSize="small" />,
+    route: "/vehicles",
     component: <Notifications />,
   },
   {
     type: "collapse",
-    name: "Profile",
-    key: "profile",
-    icon: <Icon fontSize="small">person</Icon>,
-    route: "/profile",
+    name: "Parking Sessions",
+    key: "parking-sessions",
+    icon: <AccessTimeIcon fontSize="small" />,
+    route: "/parking-sessions",
     component: <Profile />,
   },
+  { type: "divider", key: "financial-divider" },
   {
     type: "collapse",
-    name: "Sign In",
-    key: "sign-in",
-    icon: <Icon fontSize="small">login</Icon>,
-    route: "/authentication/sign-in",
+    name: "Invoices",
+    key: "invoices",
+    icon: <ReceiptLongIcon fontSize="small" />,
+    route: "/invoices",
     component: <SignIn />,
   },
   {
     type: "collapse",
-    name: "Sign Up",
-    key: "sign-up",
-    icon: <Icon fontSize="small">assignment</Icon>,
-    route: "/authentication/sign-up",
+    name: "Activity Log",
+    key: "activity-log",
+    icon: <ListAltIcon fontSize="small" />,
+    route: "/activity-log",
+    noCollapse: true,
+  },
+  { type: "divider", key: "account-divider" },
+  {
+    type: "collapse",
+    name: "My Profile",
+    key: "profile",
+    icon: <AccountCircleIcon fontSize="small" />,
+    route: "/my-profile",
     component: <SignUp />,
+  },
+  {
+    type: "collapse",
+    name: "Settings",
+    key: "settings",
+    icon: <SettingsIcon fontSize="small" />,
+    route: "/settings",
+    noCollapse: true,
+  },
+  {
+    type: "collapse",
+    name: "Logout",
+    key: "logout",
+    icon: <LogoutIcon fontSize="small" />,
+    route: "/authentication/sign-in",
+    component: <SignIn />,
   },
 ];
 
