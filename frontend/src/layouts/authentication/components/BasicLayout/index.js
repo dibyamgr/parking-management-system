@@ -12,14 +12,22 @@ import PageLayout from "examples/LayoutContainers/PageLayout";
 // Authentication pages components
 import Footer from "layouts/authentication/components/Footer";
 
+import { ShareLocation } from "@mui/icons-material";
+import { Box } from "@mui/material";
+
 function BasicLayout({ image, children }) {
   return (
     <PageLayout>
       <DefaultNavbar
         action={{
           type: "external",
-          route: "https://creative-tim.com/product/material-dashboard-react",
-          label: "free download",
+          route: "/",
+          label: (
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <ShareLocation sx={{ mr: 0.5 }} fontSize="small" />
+              Find Nearby Parking Zones
+            </Box>
+          ),
           color: "dark",
         }}
       />
