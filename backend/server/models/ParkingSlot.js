@@ -36,11 +36,11 @@ const parkingSlotSchema = mongoose.Schema(
       ref: "User",
       default: null,
     },
-    // occupiedByVehicle: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: "Vehicle",
-    //   default: null,
-    // },
+    occupiedByVehicle: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Vehicle",
+      default: null,
+    },
   },
   {
     timestamps: true,
