@@ -29,6 +29,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import ParkingZones from "layouts/parking-zones";
 import ParkingSlots from "layouts/parking-slots";
 import Vehicles from "layouts/vehicles";
+import ParkingSessions from "layouts/parkingSessions";
 
 const routes = [
   {
@@ -78,7 +79,7 @@ const routes = [
     key: "parking-sessions",
     icon: <AccessTimeIcon fontSize="small" />,
     route: "/parking-sessions",
-    component: <Profile />,
+    component: <ParkingSessions />,
   },
   { type: "divider", key: "financial-divider" },
   {
@@ -98,14 +99,14 @@ const routes = [
     noCollapse: true,
   },
   { type: "divider", key: "account-divider" },
-  {
-    type: "collapse",
-    name: "My Profile",
-    key: "profile",
-    icon: <AccountCircleIcon fontSize="small" />,
-    route: "/my-profile",
-    component: <SignUp />,
-  },
+  // {
+  //   type: "collapse",
+  //   name: "My Profile",
+  //   key: "profile",
+  //   icon: <AccountCircleIcon fontSize="small" />,
+  //   route: "/my-profile",
+  //   component: <SignUp />,
+  // },
   {
     type: "collapse",
     name: "Settings",
