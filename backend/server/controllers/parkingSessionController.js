@@ -364,7 +364,7 @@ const getParkingSessionById = async (req, res) => {
 const getAllParkingSessions = async (req, res) => {
   try {
     const sessions = await ParkingSession.find({}) // Use ParkingSession
-      .populate("parkingSlot")
+      .populate({ path: "parkingSlot", populate: { path: "parkingZone" } })
       .populate("vehicle")
       .populate("user", "username email")
       .populate({ path: "invoice", populate: { path: "paymentStatus" } })
