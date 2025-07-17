@@ -7,6 +7,9 @@ import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import Icon from "@mui/material/Icon";
 
+// Maps
+import "leaflet/dist/leaflet.css";
+
 // React components
 import MDBox from "components/MDBox";
 
