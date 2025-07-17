@@ -26,6 +26,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import SettingsIcon from "@mui/icons-material/Settings";
+import ParkingZones from "layouts/parking-zones";
 
 const routes = [
   {
@@ -51,7 +52,7 @@ const routes = [
     key: "parking-zones",
     icon: <MapIcon fontSize="small" />,
     route: "/parking-zones",
-    component: <Billing />,
+    component: <ParkingZones />,
   },
   {
     type: "collapse",
