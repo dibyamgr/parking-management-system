@@ -121,7 +121,6 @@ function Users() {
         setSnackbar({ open: true, message: "User updated successfully!", color: "success" });
       } else {
         const response = await usersService.createUser(formData);
-        // FIX: Access the nested 'user' object from the API response
         const newUser = response.user;
         setUsers([...users, newUser]);
         setSnackbar({ open: true, message: "New user created successfully!", color: "success" });
@@ -315,6 +314,7 @@ function Users() {
                       value={formData.role}
                       label="Role"
                       onChange={handleChange}
+                      style={{ height: "3rem" }}
                     >
                       <MenuItem value="ADMIN">Admin</MenuItem>
                       <MenuItem value="USER">User</MenuItem>
