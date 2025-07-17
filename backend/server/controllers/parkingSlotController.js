@@ -334,7 +334,7 @@ const updateParkingSlot = async (req, res) => {
             .status(404)
             .json({ message: "New Parking Zone not found." });
         }
-        slot.parkingZone = parkingZoneId;
+        slot.parkingZone = zoneExists?._id;
       }
 
       const updatedSlot = await slot.save();
