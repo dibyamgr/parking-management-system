@@ -28,6 +28,7 @@ import ListAltIcon from "@mui/icons-material/ListAlt";
 import SettingsIcon from "@mui/icons-material/Settings";
 import ParkingZones from "layouts/parking-zones";
 import ParkingSlots from "layouts/parking-slots";
+import Vehicles from "layouts/vehicles";
 
 const routes = [
   {
@@ -69,7 +70,7 @@ const routes = [
     key: "vehicles",
     icon: <DirectionsCarIcon fontSize="small" />,
     route: "/vehicles",
-    component: <Notifications />,
+    component: <Vehicles />,
   },
   {
     type: "collapse",
