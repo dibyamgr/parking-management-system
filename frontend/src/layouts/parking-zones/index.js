@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-
-// @mui material components
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import Icon from "@mui/material/Icon";
@@ -26,11 +24,11 @@ import DataTable from "examples/Tables/DataTable";
 // Map components
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import L from "leaflet";
-import "leaflet/dist/leaflet.css";
 
 // API Service
 import parkingZonesService from "services/parkingZonesService";
 
+// --- START: MODAL STYLES ---
 const modalStyle = {
   position: "absolute",
   top: "50%",
@@ -41,7 +39,12 @@ const modalStyle = {
   borderRadius: "8px",
   boxShadow: 24,
   p: 4,
+  display: "flex",
+  flexDirection: "column",
+  maxHeight: "90vh",
+  overflowY: "auto",
 };
+// --- END: MODAL STYLES ---
 
 // Custom marker icon to avoid default marker issues
 delete L.Icon.Default.prototype._getIconUrl;
@@ -97,6 +100,96 @@ function ParkingZones() {
     fetchZones();
   }, []);
 
+  // Get Address from lat and long for pinning in map
+  const getAddressFromLatLng = async (lat, lng) => {
+    const headers = {
+      "User-Agent": "Vehicle Parking Management System/1.0",
+    };
+
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`,
+        { headers }
+      );
+      const data = await response.json();
+
+      if (data && data.address) {
+        const addressParts = data.address;
+        const formattedAddress = [
+          addressParts.road || "",
+          addressParts.house_number || "",
+          addressParts.city || addressParts.town || addressParts.village || "",
+          addressParts.state || "",
+          addressParts.postcode || "",
+          addressParts.country || "",
+        ]
+          .filter(Boolean)
+          .join(", ");
+
+        setFormData((prevData) => ({ ...prevData, address: formattedAddress }));
+        setSnackbar({ open: true, message: "Address populated automatically!", color: "info" });
+      } else {
+        setSnackbar({
+          open: true,
+          message: "No address found for this location.",
+          color: "warning",
+        });
+      }
+    } catch (error) {
+      console.error("Geocoding failed: ", error);
+      setSnackbar({
+        open: true,
+        message: "Could not find an address for this location.",
+        color: "warning",
+      });
+    }
+  };
+
+  // geocoding with nominatim openstreetmap API
+  const getLatLngFromAddress = async () => {
+    if (!formData.address) {
+      setSnackbar({ open: true, message: "Please enter an address to search.", color: "warning" });
+      return;
+    }
+
+    const headers = {
+      "User-Agent": "Vehicle Parking Management System/1.0",
+    };
+
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+          formData.address
+        )}&format=json&limit=1`,
+        { headers }
+      );
+      const data = await response.json();
+
+      if (data && data.length > 0) {
+        const { lat, lon } = data[0];
+        setFormData((prevData) => ({
+          ...prevData,
+          latitude: lat,
+          longitude: lon,
+        }));
+        setSnackbar({ open: true, message: "Location found and map updated!", color: "success" });
+      } else {
+        setSnackbar({
+          open: true,
+          message: "No coordinates found for this address.",
+          color: "warning",
+        });
+      }
+    } catch (error) {
+      console.error("Geocoding failed: ", error);
+      setSnackbar({
+        open: true,
+        message: "Failed to find coordinates for the address.",
+        color: "error",
+      });
+    }
+  };
+
   const handleModalOpen = (zone = null) => {
     setCurrentZone(zone);
     if (zone) {
@@ -113,13 +206,12 @@ function ParkingZones() {
         zoneId: "",
         name: "",
         address: "",
-        latitude: "",
-        longitude: "",
+        latitude: 47.5615,
+        longitude: -52.7126,
         description: "",
       });
     }
     setModalOpen(true);
-    console.log("Modal Open??", zone, formData, modalOpen);
   };
 
   const handleModalClose = () => {
@@ -150,10 +242,16 @@ function ParkingZones() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const submitData = {
+        ...formData,
+        latitude: parseFloat(formData.latitude),
+        longitude: parseFloat(formData.longitude),
+      };
+
       if (currentZone) {
         const updatedZone = await parkingZonesService.updateParkingZone(
           currentZone.zoneId,
-          formData
+          submitData
         );
         setZones(zones.map((zone) => (zone.zoneId === updatedZone.zoneId ? updatedZone : zone)));
         setSnackbar({
@@ -162,7 +260,7 @@ function ParkingZones() {
           color: "success",
         });
       } else {
-        const newZone = await parkingZonesService.createParkingZone(formData);
+        const newZone = await parkingZonesService.createParkingZone(submitData);
         setZones([...zones, newZone]);
         setSnackbar({
           open: true,
@@ -250,15 +348,16 @@ function ParkingZones() {
     ),
   }));
 
-  // to handle map clicks and update state
   const MapClickHandler = () => {
     useMapEvents({
       click: (e) => {
+        const { lat, lng } = e.latlng;
         setFormData({
           ...formData,
-          latitude: e.latlng.lat,
-          longitude: e.latlng.lng,
+          latitude: lat,
+          longitude: lng,
         });
+        getAddressFromLatLng(lat, lng);
       },
     });
     return null;
@@ -308,7 +407,7 @@ function ParkingZones() {
                   Parking Zones
                 </MDTypography>
                 <MDButton variant="gradient" color="dark" onClick={() => handleModalOpen(null)}>
-                  <Icon sx={{ fontWeight: "bold" }}>add</Icon>&nbsp; Add Parking Zone
+                  <Icon sx={{ fontWeight: "bold" }}>add</Icon>  Add Parking Zone
                 </MDButton>
               </MDBox>
               <MDBox pt={3}>
@@ -326,7 +425,6 @@ function ParkingZones() {
       </MDBox>
       <Footer />
 
-      {/* Parking Zone Create/Edit Modal */}
       <Modal
         open={modalOpen}
         onClose={handleModalClose}
@@ -341,7 +439,11 @@ function ParkingZones() {
             <MDTypography variant="h5" mb={3}>
               {currentZone ? "Edit Parking Zone" : "Add New Parking Zone"}
             </MDTypography>
-            <MDBox component="form" onSubmit={handleSubmit}>
+            <MDBox
+              component="form"
+              onSubmit={handleSubmit}
+              sx={{ flexGrow: 1, overflowY: "auto", pr: 2 }}
+            >
               <Grid container spacing={3}>
                 <Grid item xs={12}>
                   <TextField
@@ -364,7 +466,7 @@ function ParkingZones() {
                     required
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={12} display="flex" alignItems="center">
                   <TextField
                     label="Address"
                     name="address"
@@ -373,30 +475,37 @@ function ParkingZones() {
                     fullWidth
                     required
                   />
+                  <MDButton
+                    variant="contained"
+                    color="info"
+                    onClick={getLatLngFromAddress}
+                    sx={{ ml: 2, p: 1 }}
+                  >
+                    <Icon>search</Icon>
+                  </MDButton>
                 </Grid>
 
-                {/* Map Section */}
                 <Grid item xs={12}>
                   <MDBox mb={2}>
                     <MDTypography variant="h6">Select Location on Map</MDTypography>
                     <MDTypography variant="caption" color="text">
-                      Click on the map to place a marker and get coordinates.
+                      Click on the map to place a marker and get coordinates. The address will be
+                      populated automatically.
                     </MDTypography>
                   </MDBox>
-                  <MDBox
-                    height="300px"
-                    borderRadius="lg"
-                    overflow="hidden"
-                    sx={{ "& .leaflet-container": { zIndex: 0 } }}
-                  >
+                  <div style={{ height: "300px", borderRadius: "8px", overflow: "hidden" }}>
                     <MapContainer
-                      center={[formData.latitude || 47.5615, formData.longitude || -52.7126]}
+                      key={modalOpen ? "map-active" : "map-inactive"}
+                      center={[
+                        parseFloat(formData.latitude) || 47.5615,
+                        parseFloat(formData.longitude) || -52.7126,
+                      ]}
                       zoom={13}
-                      scrollWheelZoom={false}
+                      scrollWheelZoom={true}
                       style={{ height: "100%", width: "100%" }}
                     >
                       <TileLayer
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                       />
                       <MapClickHandler />
@@ -407,7 +516,7 @@ function ParkingZones() {
                         />
                       )}
                     </MapContainer>
-                  </MDBox>
+                  </div>
                 </Grid>
 
                 <Grid item xs={12} sm={6}>
@@ -418,7 +527,7 @@ function ParkingZones() {
                     onChange={handleChange}
                     fullWidth
                     required
-                    disabled // Value is now set by the map
+                    disabled
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -429,7 +538,7 @@ function ParkingZones() {
                     onChange={handleChange}
                     fullWidth
                     required
-                    disabled // Value is now set by the map
+                    disabled
                   />
                 </Grid>
 
@@ -458,7 +567,6 @@ function ParkingZones() {
         </Fade>
       </Modal>
 
-      {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
