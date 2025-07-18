@@ -30,6 +30,7 @@ import ParkingZones from "layouts/parking-zones";
 import ParkingSlots from "layouts/parking-slots";
 import Vehicles from "layouts/vehicles";
 import ParkingSessions from "layouts/parkingSessions";
+import Invoices from "layouts/invoices";
 
 const routes = [
   {
@@ -88,7 +89,7 @@ const routes = [
     key: "invoices",
     icon: <ReceiptLongIcon fontSize="small" />,
     route: "/invoices",
-    component: <SignIn />,
+    component: <Invoices />,
   },
   {
     type: "collapse",
