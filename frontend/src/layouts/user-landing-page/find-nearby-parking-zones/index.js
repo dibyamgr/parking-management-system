@@ -6,7 +6,7 @@ import Icon from "@mui/material/Icon";
 import bgImage from "assets/images/parking-cover.jpg";
 import UserLayout from "layouts/user-landing-page/components/UserLayout";
 
-const Maps_API_KEY = "AIzaSyC2pYFZSJPyqUlguy8yPNXJfbZNu7kNCnQ";
+const Maps_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
 
 const FindNearbyParkingZones = () => {
   const [userLocation, setUserLocation] = useState(null);
