@@ -1,13 +1,15 @@
 const request = require("supertest");
 const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken");
 const { MongoMemoryServer } = require("mongodb-memory-server");
 const app = require("../server/app");
+
 const User = require("../server/models/User");
 const PaymentStatus = require("../server/models/PaymentStatus");
 
 let mongoServer;
-let sampleStatus;
 let authToken;
+let sampleStatus;
 
 beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create();
@@ -18,9 +20,11 @@ beforeAll(async () => {
     email: "admin@test.com",
     password: "adminpass",
     role: "ADMIN",
-    });
+  });
 
-    authToken = "Bearer " + jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET);
+  authToken =
+    "Bearer " +
+    jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET);
 
   sampleStatus = await PaymentStatus.create({
     status: "PAID",
@@ -37,7 +41,7 @@ afterAll(async () => {
 describe("📄 PaymentStatus Controller", () => {
   it("should return all payment statuses", async () => {
     const res = await request(app)
-      .get("/api/payment-statuses/admin/${fakeId}")
+      .get("/api/payment-statuses/admin")
       .set("Authorization", authToken);
 
     expect(res.statusCode).toBe(200);
@@ -47,7 +51,9 @@ describe("📄 PaymentStatus Controller", () => {
   });
 
   it("should return status by ID", async () => {
-    const res = await request(app).get(`/api/payment-statuses/${sampleStatus._id}`);
+    const res = await request(app)
+      .get(`/api/payment-statuses/admin/${sampleStatus._id}`)
+      .set("Authorization", authToken);
 
     expect(res.statusCode).toBe(200);
     expect(res.body.transactionId).toBe("TXN123456789");
@@ -55,12 +61,13 @@ describe("📄 PaymentStatus Controller", () => {
   });
 
   it("should return 404 for nonexistent status ID", async () => {
-  const fakeId = new mongoose.Types.ObjectId();
-  const res = await request(app)
-    .get(`/api/payment-statuses/admin/${fakeId}`)
-    .set("Authorization", authToken);
+    const fakeId = new mongoose.Types.ObjectId();
+    const res = await request(app)
+      .get(`/api/payment-statuses/admin/${fakeId}`)
+      .set("Authorization", authToken);
 
-  expect(res.statusCode).toBe(404);
-  expect(res.body?.message?.toLowerCase()).toMatch(/not found/i); // ✅ Safely avoids crash
-});
+    expect(res.statusCode).toBe(404);
+    expect(typeof res.body.message).toBe("string");
+    expect(res.body.message.toLowerCase()).toMatch(/not found/i);
+  });
 });

@@ -25,6 +25,6 @@ app.use("/api/vehicles", vehicleRoutes);
 app.use("/api/parking-sessions", parkingSessionRoutes);
 app.use("/api/invoices", invoiceRoutes);
 app.use('/api/logs', logRoutes);
-app.use("/api/admin/payment-statuses", paymentStatusRoutes);
+app.use("/api/payment-statuses", paymentStatusRoutes);
 
 module.exports = app;
