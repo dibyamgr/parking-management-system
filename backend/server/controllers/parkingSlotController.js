@@ -50,6 +50,11 @@ const createParkingSlot = async (req, res) => {
       status: "AVAILABLE",
       isAvailable: true,
     });
+    // Dynamically update total and available slots in the Parking Zone
+    await ParkingZone.updateOne(
+      { _id: zoneExists._id },
+      { $inc: { totalSlots: 1, availableSlots: 1 } }
+    );
     await Log.create({
       action: "Parking Slot Created",
       userId: req.user._id,
@@ -72,35 +77,15 @@ const isSlotAvailableForBooking = async (
   requestedStartTime,
   requestedEndTime
 ) => {
-  // 1. Check current status of the slot
-  const slot = await ParkingSlot.findById(slotId);
-  if (!slot || slot.status === "OCCUPIED" || !slot.isAvailable) {
-    return false;
-  }
-
-  // 2. Check for overlapping 'RESERVED' or 'ACTIVE' sessions
+  // Check for any overlapping 'RESERVED' or 'ACTIVE' sessions
   const overlappingSessions = await ParkingSession.find({
     parkingSlot: slotId,
     status: { $in: ["RESERVED", "ACTIVE"] },
-    $or: [
-      // Session starts during the requested interval
-      {
-        entryTime: { $lt: requestedEndTime },
-        exitTime: { $gt: requestedStartTime },
-      },
-      // Session ends during the requested interval
-      {
-        entryTime: { $lt: requestedEndTime },
-        exitTime: { $gt: requestedStartTime },
-      },
-      // Requested interval is fully within a session
-      {
-        entryTime: { $lte: requestedStartTime },
-        exitTime: { $gte: requestedEndTime },
-      },
+    $and: [
+      { entryTime: { $lt: requestedEndTime } },
+      { exitTime: { $gt: requestedStartTime } },
     ],
   });
-
   return overlappingSessions.length === 0;
 };
 
@@ -302,6 +287,9 @@ const updateParkingSlot = async (req, res) => {
     const slot = await ParkingSlot.findOne({ slotId: req.params.id });
 
     if (slot) {
+      const originalIsAvailable = slot.isAvailable;
+      const originalZoneId = slot.parkingZone;
+
       if (slotType) {
         if (!["COMPACT", "REGULAR", "LARGE"].includes(slotType.toUpperCase())) {
           return res.status(400).json({ message: "Invalid slot type." });
@@ -325,8 +313,33 @@ const updateParkingSlot = async (req, res) => {
           return res.status(400).json({ message: "Invalid status." });
         }
         slot.status = status.toUpperCase();
+        if (status.toUpperCase() === "AVAILABLE" && !originalIsAvailable) {
+          // Status changed to AVAILABLE, increment available count
+          await ParkingZone.updateOne(
+            { _id: originalZoneId },
+            { $inc: { availableSlots: 1 } }
+          );
+        } else if (
+          status.toUpperCase() !== "AVAILABLE" &&
+          originalIsAvailable
+        ) {
+          // Status changed from AVAILABLE, decrement available count
+          await ParkingZone.updateOne(
+            { _id: originalZoneId },
+            { $inc: { availableSlots: -1 } }
+          );
+        }
       }
-      if (isAvailable !== undefined) slot.isAvailable = isAvailable;
+      if (isAvailable !== undefined) {
+        if (isAvailable !== originalIsAvailable) {
+          const incValue = isAvailable ? 1 : -1;
+          await ParkingZone.updateOne(
+            { _id: originalZoneId },
+            { $inc: { availableSlots: incValue } }
+          );
+        }
+        slot.isAvailable = isAvailable;
+      }
       if (parkingZoneId) {
         const zoneExists = await ParkingZone.findOne({ zoneId: parkingZoneId });
         if (!zoneExists) {
@@ -334,7 +347,27 @@ const updateParkingSlot = async (req, res) => {
             .status(404)
             .json({ message: "New Parking Zone not found." });
         }
-        slot.parkingZone = zoneExists?._id;
+        // If parkingZoneId changed, update both old and new zones
+        if (zoneExists._id.toString() !== originalZoneId.toString()) {
+          // Decrement counts from old zone
+          await ParkingZone.updateOne(
+            { _id: originalZoneId },
+            {
+              $inc: {
+                totalSlots: -1,
+                availableSlots: slot.isAvailable ? -1 : 0,
+              },
+            }
+          );
+          // Increment counts in new zone
+          await ParkingZone.updateOne(
+            { _id: zoneExists._id },
+            {
+              $inc: { totalSlots: 1, availableSlots: slot.isAvailable ? 1 : 0 },
+            }
+          );
+          slot.parkingZone = zoneExists?._id;
+        }
       }
 
       const updatedSlot = await slot.save();
@@ -377,6 +410,15 @@ const deleteParkingSlot = async (req, res) => {
             "Cannot delete slot with active or reserved parking sessions.",
         });
       }
+
+      // Decrement counts in the associated Parking Zone
+      const updateDoc = {
+        $inc: { totalSlots: -1 },
+      };
+      if (slot.isAvailable) {
+        updateDoc.$inc.availableSlots = -1;
+      }
+      await ParkingZone.updateOne({ _id: slot.parkingZone }, updateDoc);
 
       await slot.deleteOne();
       await Log.create({
