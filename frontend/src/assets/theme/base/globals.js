@@ -21,6 +21,9 @@ const globals = {
   "a.link:hover, .link:hover, a.link:focus, .link:focus": {
     color: `${info.main} !important`,
   },
+  body: {
+    overflowX: "hidden",
+  },
 };
 
 export default globals;
