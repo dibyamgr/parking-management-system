@@ -32,6 +32,10 @@ import Vehicles from "layouts/vehicles";
 import ParkingSessions from "layouts/parkingSessions";
 import Invoices from "layouts/invoices";
 
+import FindParkingPage from "layouts/user-landing-page/find-parking";
+import FindNearbyParkingZones from "layouts/user-landing-page/find-nearby-parking-zones";
+import SearchResultsPage from "layouts/user-landing-page/searchResults";
+
 const routes = [
   {
     type: "collapse",
@@ -123,6 +127,51 @@ const routes = [
     icon: <LogoutIcon fontSize="small" />,
     route: "/authentication/sign-in",
     component: <SignIn />,
+  },
+  {
+    type: "collapse",
+    name: "Sign In",
+    key: "sign-in",
+    icon: <AccountCircleIcon fontSize="small" />,
+    route: "/authentication/sign-in",
+    component: <SignIn />,
+  },
+  {
+    type: "collapse",
+    name: "Sign Up",
+    key: "sign-up",
+    icon: <AccountCircleIcon fontSize="small" />,
+    route: "/authentication/sign-up",
+    component: <SignUp />,
+  },
+  {
+    type: "route",
+    name: "Find Nearby Parking Zones",
+    key: "find-nearby-parking-zones",
+    icon: <MapIcon fontSize="small" />,
+    route: "/find-nearby-parking-zones",
+    component: <FindNearbyParkingZones />,
+    layout: "user-public",
+    noCollapse: true,
+  },
+  {
+    type: "route",
+    name: "Find Parking",
+    key: "find-parking",
+    icon: <MapIcon fontSize="small" />,
+    route: "/",
+    component: <FindParkingPage />,
+    layout: "user-public",
+    noCollapse: true,
+  },
+  {
+    type: "route",
+    name: "Search Results",
+    key: "search-results",
+    route: "/search-results",
+    component: <SearchResultsPage />,
+    layout: "user-public",
+    noCollapse: true,
   },
 ];
 
