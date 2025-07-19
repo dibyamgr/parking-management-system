@@ -14,6 +14,7 @@ const isSlotAvailableForBooking = async (
   requestedEndTime
 ) => {
   const slot = await ParkingSlot.findOne({ slotId });
+  console.log(slot, "slot in isSlotAvailableForBooking");
   if (!slot || slot.status === "OCCUPIED" || !slot.isAvailable) {
     return false;
   }
@@ -31,6 +32,10 @@ const isSlotAvailableForBooking = async (
       },
     ],
   });
+  console.log(
+    overlappingSessions,
+    "overlappingSessions in isSlotAvailableForBooking"
+  );
   return overlappingSessions.length === 0;
 };
 
@@ -61,6 +66,8 @@ const startParkingSession = async (req, res) => {
       .status(400)
       .json({ message: "Start time must be before end time." });
   }
+
+  console.log(new Date(Date.now() - 60 * 1000), "Current time minus 1 minute");
   if (newEntryTime < new Date(Date.now() - 60 * 1000)) {
     return res
       .status(400)
