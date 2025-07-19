@@ -26,8 +26,10 @@ const parkingSlotsService = {
     return response.data;
   },
 
-  searchParkingSlots: async (query) => {
-    const response = await axiosInstance.get(`/parking-slots?q=${query}`);
+  searchParkingSlots: async (searchParams) => {
+    const response = await axiosInstance.get(`/parking-slots`, {
+      params: searchParams,
+    });
     return response.data;
   },
 };
