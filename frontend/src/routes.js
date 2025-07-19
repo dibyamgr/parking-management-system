@@ -36,6 +36,7 @@ import FindParkingPage from "layouts/user-landing-page/find-parking";
 import FindNearbyParkingZones from "layouts/user-landing-page/find-nearby-parking-zones";
 import SearchResultsPage from "layouts/user-landing-page/searchResults";
 import BookingPage from "layouts/user-landing-page/booking";
+import BookingsList from "layouts/user-landing-page/booking/BookingsList";
 
 const routes = [
   {
@@ -180,6 +181,15 @@ const routes = [
     key: "search-results",
     route: "/book/:parkingSlotId",
     component: <BookingPage />,
+    layout: "user-public",
+    noCollapse: true,
+  },
+  {
+    type: "route",
+    name: "My Bookings",
+    key: "my-bookings",
+    route: "/my-bookings",
+    component: <BookingsList />,
     layout: "user-public",
     noCollapse: true,
   },

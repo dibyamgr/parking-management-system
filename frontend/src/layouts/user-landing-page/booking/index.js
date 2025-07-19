@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import moment from "moment";
 
 // @mui material components
@@ -25,6 +25,7 @@ function BookingPage() {
   const query = new URLSearchParams(location.search);
   const parkingSlot = location.state?.parkingSlot;
 
+  const navigate = useNavigate();
   // State for user input and booking details
   const [licensePlate, setLicensePlate] = useState("");
   const [bookingStatus, setBookingStatus] = useState("idle");
@@ -80,7 +81,8 @@ function BookingPage() {
       }
 
       setBookingStatus("success");
-      alert("Parking spot booked successfully!");
+      // alert("Parking spot booked successfully!");
+      navigate("/my-bookings");
     } catch (error) {
       setBookingStatus("error");
       console.error("Booking failed:", error);
