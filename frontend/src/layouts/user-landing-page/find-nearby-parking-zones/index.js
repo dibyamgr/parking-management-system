@@ -1,22 +1,31 @@
-import React, { useState, useEffect, useRef } from "react";
+// FindNearbyParkingZones.js (Updated with Accordion and Slot Booking)
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDButton from "components/MDButton";
 import MDInput from "components/MDInput";
 import Icon from "@mui/material/Icon";
-import { Card, Grid, CircularProgress } from "@mui/material";
+import {
+  Card,
+  Grid,
+  CircularProgress,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+} from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import bgImage from "assets/images/parking-cover.jpg";
 import UserLayout from "layouts/user-landing-page/components/UserLayout";
 import axiosInstance from "utils/axiosInstance";
 import PropTypes from "prop-types";
 
 // Leaflet Map components
-import { MapContainer, TileLayer, Marker, useMap, Circle } from "react-leaflet"; // Import Circle
+import { MapContainer, TileLayer, Marker, useMap, Circle } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-// Custom marker icon to avoid default marker issues
+// Custom marker icons
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: "https://unpkg.com/leaflet@1.9.3/dist/images/marker-icon-2x.png",
@@ -24,9 +33,19 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.3/dist/images/marker-shadow.png",
 });
 
-const customIcon = new L.Icon({
+const userLocationIcon = new L.Icon({
   iconUrl: "https://unpkg.com/leaflet@1.9.3/dist/images/marker-icon.png",
   shadowUrl: "https://unpkg.com/leaflet@1.9.3/dist/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
+
+const parkingZoneIcon = new L.Icon({
+  iconUrl:
+    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
+  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
@@ -56,14 +75,19 @@ const FindNearbyParkingZones = () => {
   const [arrivingDate, setArrivingDate] = useState("");
   const [arrivingTime, setArrivingTime] = useState("");
   const [leavingTime, setLeavingTime] = useState("");
+  const [expanded, setExpanded] = useState(false);
 
-  const defaultLocation = [47.5615, -52.7126]; // Default to St. John's
-  const searchRadius = 1000; // Define search radius in meters
+  const defaultLocation = [47.5615, -52.7126]; // Default coordinates for St. John's, NL
+  const searchRadius = 1000;
+
+  const handleAccordionChange = (panel) => (event, isExpanded) => {
+    setExpanded(isExpanded ? panel : false);
+  };
 
   const fetchNearbyZones = async (latitude, longitude) => {
     try {
       const response = await axiosInstance.get(`/parking-zones/nearby`, {
-        params: { lat: latitude, lng: longitude, radius: searchRadius }, // Pass radius to backend
+        params: { lat: defaultLocation[0], lng: defaultLocation[1], radius: searchRadius },
       });
       setNearbyZones(response.data);
     } catch (err) {
@@ -95,18 +119,16 @@ const FindNearbyParkingZones = () => {
     }
   };
 
-  const handleBookClick = (zone) => {
-    // Changed from slot to zone
+  const handleBookClick = (slot) => {
     if (!arrivingDate || !arrivingTime || !leavingTime) {
       alert("Please select a date and time before booking.");
       return;
     }
-    // Navigate to a booking page for the selected parking zone
-    // You might need to adjust this route based on your actual booking flow
+    // Navigate using the slotId and pass the slot object in state
     navigate(
-      `/parking-zones/${zone._id}/book?date=${arrivingDate}&startTime=${arrivingTime}&endTime=${leavingTime}`,
+      `/book/${slot.slotId}?date=${arrivingDate}&startTime=${arrivingTime}&endTime=${leavingTime}`,
       {
-        state: { parkingZone: zone }, // Pass the entire zone object if needed
+        state: { parkingSlot: slot },
       }
     );
   };
@@ -189,11 +211,10 @@ const FindNearbyParkingZones = () => {
               <SetMapView coords={userLocation} />
               {userLocation && (
                 <>
-                  <Marker position={userLocation} icon={customIcon} />
-                  {/* Draw the circle representing the search radius */}
+                  <Marker position={userLocation} icon={userLocationIcon} />
                   <Circle
                     center={userLocation}
-                    radius={searchRadius} // Radius in meters
+                    radius={searchRadius}
                     pathOptions={{ color: "blue", fillColor: "blue", fillOpacity: 0.1, weight: 2 }}
                   />
                 </>
@@ -201,8 +222,8 @@ const FindNearbyParkingZones = () => {
               {nearbyZones.map((zone) => (
                 <Marker
                   key={zone._id}
-                  position={[zone.location.coordinates[1], zone.location.coordinates[0]]} // [lat, lng]
-                  icon={customIcon}
+                  position={[zone.location.latitude, zone.location.longitude]}
+                  icon={parkingZoneIcon}
                 />
               ))}
             </MapContainer>
@@ -214,31 +235,64 @@ const FindNearbyParkingZones = () => {
                 Nearby Zones ({nearbyZones.length})
               </MDTypography>
             </MDBox>
-            <MDBox component="ul" p={2}>
+            <MDBox component="ul" p={1}>
               {nearbyZones.length > 0 ? (
-                nearbyZones.map((zone) => (
-                  <MDBox
+                nearbyZones.map((zone, index) => (
+                  <Accordion
                     key={zone._id}
-                    component="li"
-                    p={1}
-                    sx={{ borderBottom: "1px solid #eee", "&:last-child": { borderBottom: 0 } }}
+                    expanded={expanded === `panel${index}`}
+                    onChange={handleAccordionChange(`panel${index}`)}
                   >
-                    <MDTypography variant="body1" fontWeight="bold">
-                      {zone.name}
-                    </MDTypography>
-                    <MDTypography variant="caption" color="text">
-                      {zone.address}
-                    </MDTypography>
-                    <MDButton
-                      variant="gradient"
-                      color="success"
-                      size="small"
-                      sx={{ mt: 1, float: "right" }}
-                      onClick={() => handleBookClick(zone)}
+                    <AccordionSummary
+                      expandIcon={<ExpandMoreIcon />}
+                      aria-controls={`panel${index}-content`}
+                      id={`panel${index}-header`}
                     >
-                      Book
-                    </MDButton>
-                  </MDBox>
+                      <MDTypography variant="body1" fontWeight="bold">
+                        {zone.name}
+                      </MDTypography>
+                    </AccordionSummary>
+                    <AccordionDetails sx={{ flexDirection: "column" }}>
+                      <MDTypography variant="caption" color="text" mb={1}>
+                        {zone.address}
+                      </MDTypography>
+                      {zone.slots.length > 0 ? (
+                        zone.slots.map((slot) => (
+                          <MDBox
+                            key={slot._id}
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              py: 1,
+                              borderBottom: "1px solid #eee",
+                            }}
+                          >
+                            <MDBox>
+                              <MDTypography variant="body2" fontWeight="medium">
+                                Slot ID: {slot.slotId}
+                              </MDTypography>
+                              <MDTypography variant="caption" color="text">
+                                Rate: ${slot.pricePerHour} / hour
+                              </MDTypography>
+                            </MDBox>
+                            <MDButton
+                              variant="gradient"
+                              color="success"
+                              size="small"
+                              onClick={() => handleBookClick(slot)}
+                            >
+                              Book
+                            </MDButton>
+                          </MDBox>
+                        ))
+                      ) : (
+                        <MDTypography variant="body2" color="error" textAlign="center">
+                          No available slots.
+                        </MDTypography>
+                      )}
+                    </AccordionDetails>
+                  </Accordion>
                 ))
               ) : (
                 <MDTypography variant="body2" color="text" textAlign="center" p={2}>
