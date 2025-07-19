@@ -37,7 +37,7 @@ import FindNearbyParkingZones from "layouts/user-landing-page/find-nearby-parkin
 import SearchResultsPage from "layouts/user-landing-page/searchResults";
 import BookingPage from "layouts/user-landing-page/booking";
 import BookingsList from "layouts/user-landing-page/booking/BookingsList";
-import PaymentPage from "layouts/user-landing-page/payment";
+import PaymentSucess from "layouts/user-landing-page/payment/PaymentSuccess";
 
 const routes = [
   {
@@ -194,12 +194,13 @@ const routes = [
     layout: "user-public",
     noCollapse: true,
   },
+
   {
     type: "route",
-    name: "Payment",
-    key: "payment",
-    route: "/payment/:invoiceId",
-    component: <PaymentPage />,
+    name: "Payment Success",
+    key: "payment-success",
+    route: "/payment-success/:invoiceId",
+    component: <PaymentSucess />,
     layout: "user-public",
     noCollapse: true,
   },

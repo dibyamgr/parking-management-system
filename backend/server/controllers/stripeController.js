@@ -25,7 +25,7 @@ const createCheckoutSession = async ({ invoiceId, amount, description }) => {
       metadata: {
         invoiceId: invoiceId,
       },
-      success_url: `${FE_DOMAIN}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `http://localhost:3000/payment-success/${invoiceId}`,
       cancel_url: `${FE_DOMAIN}/my-bookings`,
     });
 
