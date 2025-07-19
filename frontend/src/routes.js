@@ -38,6 +38,7 @@ import SearchResultsPage from "layouts/user-landing-page/searchResults";
 import BookingPage from "layouts/user-landing-page/booking";
 import BookingsList from "layouts/user-landing-page/booking/BookingsList";
 import PaymentSucess from "layouts/user-landing-page/payment/PaymentSuccess";
+import Invoice from "layouts/user-landing-page/invoice-billing";
 
 const routes = [
   {
@@ -201,6 +202,15 @@ const routes = [
     key: "payment-success",
     route: "/payment-success/:invoiceId",
     component: <PaymentSucess />,
+    layout: "user-public",
+    noCollapse: true,
+  },
+  {
+    type: "route",
+    name: "Invoice Billing",
+    key: "invoice-billing",
+    route: "/invoices/:invoiceId",
+    component: <Invoice />,
     layout: "user-public",
     noCollapse: true,
   },
