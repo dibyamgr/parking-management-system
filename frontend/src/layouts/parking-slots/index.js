@@ -194,6 +194,8 @@ function ParkingSlots() {
     { Header: "Slot Type", accessor: "slotType" },
     { Header: "Price Per Hour", accessor: "pricePerHour" },
     { Header: "Status", accessor: "status" },
+    { Header: "Reserved By", accessor: "reservedBy" },
+    { Header: "Vehicle", accessor: "occupiedByVehicle" },
     { Header: "Actions", accessor: "actions" },
   ];
 
@@ -237,6 +239,16 @@ function ParkingSlots() {
           size="sm"
         />
       </MDBox>
+    ),
+    reservedBy: (
+      <MDTypography variant="caption" color="text" fontWeight="medium">
+        {slot.reservedBy ? slot.reservedBy.name : "N/A"}
+      </MDTypography>
+    ),
+    occupiedByVehicle: (
+      <MDTypography variant="caption" color="text" fontWeight="medium">
+        {slot.occupiedByVehicle ? slot.occupiedByVehicle.licensePlate : "N/A"}
+      </MDTypography>
     ),
     actions: (
       <MDBox>
