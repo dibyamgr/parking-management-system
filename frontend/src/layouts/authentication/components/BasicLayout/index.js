@@ -21,7 +21,7 @@ function BasicLayout({ image, children }) {
       <DefaultNavbar
         action={{
           type: "external",
-          route: "/",
+          route: "/find-nearby-parking-zones",
           label: (
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <ShareLocation sx={{ mr: 0.5 }} fontSize="small" />
