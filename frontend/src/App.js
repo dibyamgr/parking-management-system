@@ -151,6 +151,8 @@ export default function App() {
           </>
         )}
         {layout === "vr" && <Configurator />}
+        {/* User-public layout: no dashboard sidenav, just routes */}
+        {layout === "user-public" && null}
         <Routes>
           {getRoutes(routes)}
           <Route path="*" element={<Navigate to="/dashboard" />} />
@@ -175,6 +177,8 @@ export default function App() {
         </>
       )}
       {layout === "vr" && <Configurator />}
+      {/* User-public layout: no dashboard sidenav, just routes */}
+      {layout === "user-public" && null}
       <Routes>
         {getRoutes(routes)}
         <Route path="*" element={<Navigate to="/dashboard" />} />
