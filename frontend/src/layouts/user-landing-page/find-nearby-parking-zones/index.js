@@ -1,80 +1,77 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDButton from "components/MDButton";
+import MDInput from "components/MDInput";
 import Icon from "@mui/material/Icon";
+import { Card, Grid, CircularProgress } from "@mui/material";
 import bgImage from "assets/images/parking-cover.jpg";
 import UserLayout from "layouts/user-landing-page/components/UserLayout";
+import axiosInstance from "utils/axiosInstance";
+import PropTypes from "prop-types";
 
-const Maps_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
+// Leaflet Map components
+import { MapContainer, TileLayer, Marker, useMap, Circle } from "react-leaflet"; // Import Circle
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+
+// Custom marker icon to avoid default marker issues
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.3/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.3/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.3/dist/images/marker-shadow.png",
+});
+
+const customIcon = new L.Icon({
+  iconUrl: "https://unpkg.com/leaflet@1.9.3/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.3/dist/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
+
+const SetMapView = ({ coords }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (coords) {
+      map.setView(coords, map.getZoom());
+    }
+  }, [coords, map]);
+  return null;
+};
+
+SetMapView.propTypes = {
+  coords: PropTypes.arrayOf(PropTypes.number),
+};
 
 const FindNearbyParkingZones = () => {
+  const navigate = useNavigate();
   const [userLocation, setUserLocation] = useState(null);
   const [nearbyZones, setNearbyZones] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const mapRef = useRef(null);
+  const [arrivingDate, setArrivingDate] = useState("");
+  const [arrivingTime, setArrivingTime] = useState("");
+  const [leavingTime, setLeavingTime] = useState("");
 
-  useEffect(() => {
-    if (userLocation && window.google) {
-      initMap();
+  const defaultLocation = [47.5615, -52.7126]; // Default to St. John's
+  const searchRadius = 1000; // Define search radius in meters
+
+  const fetchNearbyZones = async (latitude, longitude) => {
+    try {
+      const response = await axiosInstance.get(`/parking-zones/nearby`, {
+        params: { lat: latitude, lng: longitude, radius: searchRadius }, // Pass radius to backend
+      });
+      setNearbyZones(response.data);
+    } catch (err) {
+      setError("Failed to fetch nearby parking zones.");
+      console.error("Error fetching nearby zones:", err);
+    } finally {
+      setLoading(false);
     }
-  }, [userLocation]);
-
-  const loadGoogleMapsScript = (callback) => {
-    if (window.google) {
-      callback();
-      return;
-    }
-    const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${Maps_API_KEY}&libraries=places`;
-    script.onload = callback;
-    script.onerror = () => setError("Failed to load Google Maps script.");
-    document.head.appendChild(script);
-  };
-
-  const initMap = () => {
-    const map = new window.google.maps.Map(mapRef.current, {
-      center: userLocation,
-      zoom: 15,
-    });
-
-    new window.google.maps.Marker({
-      position: userLocation,
-      map: map,
-      title: "Your Location",
-      icon: {
-        url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
-      },
-    });
-
-    const service = new window.google.maps.places.PlacesService(map);
-    service.nearbySearch(
-      {
-        location: userLocation,
-        radius: 1000,
-        type: ["parking"],
-      },
-      (results, status) => {
-        if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
-          setNearbyZones(results);
-          for (let i = 0; i < results.length; i++) {
-            createMarker(results[i], map);
-          }
-        } else {
-          setNearbyZones([]);
-        }
-        setLoading(false);
-      }
-    );
-  };
-
-  const createMarker = (place, map) => {
-    new window.google.maps.Marker({
-      map: map,
-      position: place.geometry.location,
-      title: place.name,
-    });
   };
 
   const handleFindNearby = () => {
@@ -84,10 +81,8 @@ const FindNearbyParkingZones = () => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
-          setUserLocation({ lat: latitude, lng: longitude });
-          loadGoogleMapsScript(() => {
-            // Script loaded, useEffect will handle map initialization
-          });
+          setUserLocation([latitude, longitude]);
+          fetchNearbyZones(latitude, longitude);
         },
         (err) => {
           console.error(err);
@@ -98,6 +93,22 @@ const FindNearbyParkingZones = () => {
     } else {
       setError("Geolocation is not supported by this browser.");
     }
+  };
+
+  const handleBookClick = (zone) => {
+    // Changed from slot to zone
+    if (!arrivingDate || !arrivingTime || !leavingTime) {
+      alert("Please select a date and time before booking.");
+      return;
+    }
+    // Navigate to a booking page for the selected parking zone
+    // You might need to adjust this route based on your actual booking flow
+    navigate(
+      `/parking-zones/${zone._id}/book?date=${arrivingDate}&startTime=${arrivingTime}&endTime=${leavingTime}`,
+      {
+        state: { parkingZone: zone }, // Pass the entire zone object if needed
+      }
+    );
   };
 
   return (
@@ -118,7 +129,7 @@ const FindNearbyParkingZones = () => {
             disabled={loading}
             startIcon={<Icon>location_on</Icon>}
           >
-            {loading ? "Finding..." : "Find My Location"}
+            {loading ? <CircularProgress size={20} color="inherit" /> : "Find My Location"}
           </MDButton>
         </MDBox>
         {error && (
@@ -127,31 +138,76 @@ const FindNearbyParkingZones = () => {
           </MDTypography>
         )}
 
-        {/* Map and Sidebar container */}
+        <Grid container spacing={2} mt={2}>
+          <Grid item xs={12} md={4}>
+            <MDInput
+              label="Arriving on"
+              type="date"
+              fullWidth
+              value={arrivingDate}
+              onChange={(e) => setArrivingDate(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+            />
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <MDInput
+              label="Arriving time"
+              type="time"
+              fullWidth
+              value={arrivingTime}
+              onChange={(e) => setArrivingTime(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+            />
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <MDInput
+              label="Leaving time"
+              type="time"
+              fullWidth
+              value={leavingTime}
+              onChange={(e) => setLeavingTime(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+            />
+          </Grid>
+        </Grid>
+
         <MDBox mt={4} sx={{ height: "60vh", display: "flex", gap: "16px" }}>
-          {/* Map container */}
           <MDBox
             flex={2}
             sx={{ border: "1px solid #ccc", borderRadius: "8px", overflow: "hidden" }}
-            ref={mapRef}
           >
-            {!userLocation && (
-              <MDBox
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                height="100%"
-                textAlign="center"
-                p={2}
-              >
-                <MDTypography variant="h6" color="text">
-                  Click the button above to find nearby parking.
-                </MDTypography>
-              </MDBox>
-            )}
+            <MapContainer
+              center={userLocation || defaultLocation}
+              zoom={13}
+              scrollWheelZoom={true}
+              style={{ height: "100%", width: "100%" }}
+            >
+              <TileLayer
+                attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <SetMapView coords={userLocation} />
+              {userLocation && (
+                <>
+                  <Marker position={userLocation} icon={customIcon} />
+                  {/* Draw the circle representing the search radius */}
+                  <Circle
+                    center={userLocation}
+                    radius={searchRadius} // Radius in meters
+                    pathOptions={{ color: "blue", fillColor: "blue", fillOpacity: 0.1, weight: 2 }}
+                  />
+                </>
+              )}
+              {nearbyZones.map((zone) => (
+                <Marker
+                  key={zone._id}
+                  position={[zone.location.coordinates[1], zone.location.coordinates[0]]} // [lat, lng]
+                  icon={customIcon}
+                />
+              ))}
+            </MapContainer>
           </MDBox>
 
-          {/* Sidebar container */}
           <MDBox flex={1} sx={{ border: "1px solid #ccc", borderRadius: "8px", overflowY: "auto" }}>
             <MDBox variant="gradient" bgColor="dark" p={2} sx={{ borderBottom: "1px solid #ccc" }}>
               <MDTypography variant="h6" color="white" textAlign="center">
@@ -162,7 +218,7 @@ const FindNearbyParkingZones = () => {
               {nearbyZones.length > 0 ? (
                 nearbyZones.map((zone) => (
                   <MDBox
-                    key={zone.place_id}
+                    key={zone._id}
                     component="li"
                     p={1}
                     sx={{ borderBottom: "1px solid #eee", "&:last-child": { borderBottom: 0 } }}
@@ -171,8 +227,17 @@ const FindNearbyParkingZones = () => {
                       {zone.name}
                     </MDTypography>
                     <MDTypography variant="caption" color="text">
-                      {zone.vicinity}
+                      {zone.address}
                     </MDTypography>
+                    <MDButton
+                      variant="gradient"
+                      color="success"
+                      size="small"
+                      sx={{ mt: 1, float: "right" }}
+                      onClick={() => handleBookClick(zone)}
+                    >
+                      Book
+                    </MDButton>
                   </MDBox>
                 ))
               ) : (
