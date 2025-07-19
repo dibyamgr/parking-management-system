@@ -35,6 +35,7 @@ import Invoices from "layouts/invoices";
 import FindParkingPage from "layouts/user-landing-page/find-parking";
 import FindNearbyParkingZones from "layouts/user-landing-page/find-nearby-parking-zones";
 import SearchResultsPage from "layouts/user-landing-page/searchResults";
+import BookingPage from "layouts/user-landing-page/booking";
 
 const routes = [
   {
@@ -170,6 +171,15 @@ const routes = [
     key: "search-results",
     route: "/search-results",
     component: <SearchResultsPage />,
+    layout: "user-public",
+    noCollapse: true,
+  },
+  {
+    type: "route",
+    name: "Search Results",
+    key: "search-results",
+    route: "/book/:parkingSlotId",
+    component: <BookingPage />,
     layout: "user-public",
     noCollapse: true,
   },
