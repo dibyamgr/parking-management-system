@@ -5,6 +5,7 @@ const {
   getParkingZoneById,
   updateParkingZone,
   deleteParkingZone,
+  getNearbyParkingZones,
 } = require("../controllers/parkingZoneController");
 const { protect, authorize } = require("../middlewares/authMiddleware");
 
@@ -14,6 +15,8 @@ router
   .route("/")
   .get(getParkingZones)
   .post(protect, authorize("ADMIN"), createParkingZone);
+
+router.get("/nearby", getNearbyParkingZones);
 
 router
   .route("/:id")

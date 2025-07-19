@@ -25,11 +25,21 @@ const getInvoiceById = async (req, res) => {
   try {
     const invoice = await Invoice.findById(req.params.id)
       .populate("user", "name email")
+      .populate("paymentStatus")
       .populate({
         path: "parkingSession",
-        populate: { path: "parkingSlot vehicle" },
-      })
-      .populate("paymentStatus");
+        populate: [
+          {
+            path: "parkingSlot",
+            populate: {
+              path: "parkingZone",
+            },
+          },
+          {
+            path: "vehicle",
+          },
+        ],
+      });
 
     if (!invoice) {
       return res.status(404).json({ message: "Invoice not found." });

@@ -116,7 +116,11 @@ function DefaultNavbar({ transparent, light, action, type }) {
               light={light}
             />
           )}
-          <DefaultNavbarLink icon="person" name="profile" route="/profile" light={light} />
+          {type === "user" ? (
+            <DefaultNavbarLink icon="person" name="myBookings" route="/my-bookings" light={light} />
+          ) : (
+            <DefaultNavbarLink icon="person" name="profile" route="/profile" light={light} />
+          )}
           <DefaultNavbarLink
             icon="account_circle"
             name="sign up"
