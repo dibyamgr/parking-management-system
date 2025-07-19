@@ -25,7 +25,7 @@ import { useAppUIController } from "context";
 
 import Logo from "assets/images/logos/logo-white.png";
 
-function DefaultNavbar({ transparent, light, action }) {
+function DefaultNavbar({ transparent, light, action, type }) {
   const [controller] = useAppUIController();
   const { darkMode } = controller;
 
@@ -106,7 +106,16 @@ function DefaultNavbar({ transparent, light, action }) {
           </MDTypography>
         </MDBox>
         <MDBox color="inherit" display={{ xs: "none", lg: "flex" }} m={0} p={0}>
-          <DefaultNavbarLink icon="donut_large" name="dashboard" route="/dashboard" light={light} />
+          {type === "user" ? (
+            <DefaultNavbarLink icon="donut_large" name="Home" route="/" light={light} />
+          ) : (
+            <DefaultNavbarLink
+              icon="donut_large"
+              name="dashboard"
+              route="/dashboard"
+              light={light}
+            />
+          )}
           <DefaultNavbarLink icon="person" name="profile" route="/profile" light={light} />
           <DefaultNavbarLink
             icon="account_circle"
@@ -196,6 +205,7 @@ DefaultNavbar.propTypes = {
       label: PropTypes.string.isRequired,
     }),
   ]),
+  type: PropTypes.oneOf(["user", "admin"]),
 };
 
 export default DefaultNavbar;
