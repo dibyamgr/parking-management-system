@@ -37,6 +37,7 @@ import FindNearbyParkingZones from "layouts/user-landing-page/find-nearby-parkin
 import SearchResultsPage from "layouts/user-landing-page/searchResults";
 import BookingPage from "layouts/user-landing-page/booking";
 import BookingsList from "layouts/user-landing-page/booking/BookingsList";
+import PaymentPage from "layouts/user-landing-page/payment";
 
 const routes = [
   {
@@ -190,6 +191,15 @@ const routes = [
     key: "my-bookings",
     route: "/my-bookings",
     component: <BookingsList />,
+    layout: "user-public",
+    noCollapse: true,
+  },
+  {
+    type: "route",
+    name: "Payment",
+    key: "payment",
+    route: "/payment/:invoiceId",
+    component: <PaymentPage />,
     layout: "user-public",
     noCollapse: true,
   },

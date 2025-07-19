@@ -10,6 +10,7 @@ import axiosInstance from "utils/axiosInstance";
 import MDButton from "components/MDButton";
 import bgImage from "assets/images/parking-cover.jpg";
 import MDBadge from "components/MDBadge";
+import { useNavigate } from "react-router-dom";
 
 // Helper function to format the timer display
 const formatTime = (duration) => {
@@ -27,6 +28,8 @@ const MyBookingsPage = () => {
   const [error, setError] = useState(null);
   const [activeSession, setActiveSession] = useState(null);
   const [remainingTime, setRemainingTime] = useState("00:00:00");
+
+  const navigate = useNavigate();
 
   const fetchSessions = async () => {
     try {
@@ -70,11 +73,17 @@ const MyBookingsPage = () => {
 
   const handleEndSession = async (sessionId) => {
     try {
-      await axiosInstance.post(`/parking-sessions/${sessionId}/end`, {
+      const response = await axiosInstance.post(`/parking-sessions/${sessionId}/end`, {
         actualExitTime: moment.utc().toISOString(),
       });
-      alert("Parking session ended successfully!");
-      fetchSessions();
+
+      if (!response.data || !response.data.session) {
+        throw new Error("Failed to end session.");
+      }
+
+      const stripementUrl = response.data?.paymentUrl;
+
+      navigate(stripementUrl);
     } catch (err) {
       console.error("Error ending session:", err);
       alert("Failed to end session.");

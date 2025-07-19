@@ -5,7 +5,8 @@ const Invoice = require("../models/Invoice");
 const PaymentStatus = require("../models/PaymentStatus");
 const Log = require("../models/Log");
 const sendEmail = require("../utils/sendEmail");
-const { format, isValid } = require("date-fns");
+const moment = require("moment"); // Use moment library
+const stripeController = require("./stripeController");
 
 // Helper function (copied from ParkingSlotController to avoid circular dependency)
 const isSlotAvailableForBooking = async (
@@ -39,9 +40,9 @@ const isSlotAvailableForBooking = async (
   return overlappingSessions.length === 0;
 };
 
-// @desc    Start a parking session (reserve or go active directly)
-// @route   POST /api/parking-sessions/start
-// @access  Private
+// @desc    Start a parking session (reserve or go active directly)
+// @route   POST /api/parking-sessions/start
+// @access  Private
 const startParkingSession = async (req, res) => {
   const { parkingSlotId, vehicleId, startTime, endTime } = req.body;
 
@@ -52,27 +53,36 @@ const startParkingSession = async (req, res) => {
     });
   }
 
-  const newEntryTime = new Date(startTime);
-  const newExitTime = new Date(endTime);
+  console.log(startTime, endTime, "startTime and endTime from request body");
+  const newEntryTime = moment.utc(startTime);
+  const newExitTime = moment.utc(endTime);
 
-  // Date Validations
-  if (!isValid(newEntryTime) || !isValid(newExitTime)) {
+  // Date Validations using moment
+  if (!newEntryTime.isValid() || !newExitTime.isValid()) {
     return res
       .status(400)
       .json({ message: "Invalid date or time format provided." });
   }
-  if (newEntryTime >= newExitTime) {
+  if (newEntryTime.isSameOrAfter(newExitTime)) {
     return res
       .status(400)
       .json({ message: "Start time must be before end time." });
   }
 
-  console.log(new Date(Date.now() - 60 * 1000), "Current time minus 1 minute");
-  if (newEntryTime < new Date(Date.now() - 60 * 1000)) {
-    return res
-      .status(400)
-      .json({ message: "Cannot book for a time in the past." });
-  }
+  console.log(
+    newEntryTime,
+    newExitTime,
+    moment().subtract(1, "minute"),
+    "Current time minus 1 minute",
+    newEntryTime.isBefore(moment.utc().subtract(1, "minute"))
+  );
+
+  // TODO: Fix time issue
+  // if (newEntryTime.isBefore(moment.utc().subtract(1, "minute"))) {
+  //   return res
+  //     .status(400)
+  //     .json({ message: "Cannot book for a time in the past." });
+  // }
 
   try {
     const slot = await ParkingSlot.findOne({ slotId: parkingSlotId }).populate(
@@ -93,8 +103,8 @@ const startParkingSession = async (req, res) => {
 
     const isAvailable = await isSlotAvailableForBooking(
       parkingSlotId,
-      newEntryTime,
-      newExitTime
+      newEntryTime.toDate(), // Convert moment objects to Date objects for Mongoose
+      newExitTime.toDate()
     );
 
     console.log(isAvailable, "isAvailable====");
@@ -105,17 +115,20 @@ const startParkingSession = async (req, res) => {
       });
     }
 
-    const currentDateTime = new Date();
+    const currentDateTime = moment();
     let sessionStatus = "RESERVED";
-    if (newEntryTime <= currentDateTime && newExitTime > currentDateTime) {
+    if (
+      newEntryTime.isSameOrBefore(currentDateTime) &&
+      newExitTime.isAfter(currentDateTime)
+    ) {
       sessionStatus = "ACTIVE";
     }
 
     const paymentStatus = await PaymentStatus.create({ status: "PENDING" });
 
     const session = await ParkingSession.create({
-      entryTime: newEntryTime,
-      exitTime: newExitTime,
+      entryTime: newEntryTime.toDate(), // Store as Date object
+      exitTime: newExitTime.toDate(), // Store as Date object
       parkingSlot: slot?._id,
       vehicle: vehicle?._id,
       user: req.user._id,
@@ -133,8 +146,10 @@ const startParkingSession = async (req, res) => {
     }
     await slot.save();
 
-    const estimatedDurationHours =
-      (newExitTime.getTime() - newEntryTime.getTime()) / (1000 * 60 * 60);
+    // Use moment.duration for robust calculation
+    const estimatedDurationHours = moment
+      .duration(newExitTime.diff(newEntryTime))
+      .asHours();
     const estimatedAmount = estimatedDurationHours * slot.pricePerHour;
 
     const invoice = await Invoice.create({
@@ -169,39 +184,35 @@ const startParkingSession = async (req, res) => {
         sessionStatus === "ACTIVE" ? "Parking Started" : "Booking Confirmation"
       } - Slot ${slot.slotId}`,
       html: `
-                <h1>Your Parking ${
-                  sessionStatus === "ACTIVE"
-                    ? "Session has Started!"
-                    : "Booking is Confirmed!"
-                }</h1>
-                <p>Hello ${req.user.name},</p>
-                <p>Your parking spot has been successfully ${
-                  sessionStatus === "ACTIVE" ? "occupied" : "reserved"
-                }.</p>
-                <p><strong>Session ID:</strong> ${populatedSession._id}</p>
-                <p><strong>Parking Slot:</strong> ${
-                  populatedSession.parkingSlot.slotId
-                } in ${populatedSession.parkingSlot.parkingZone.name}</p>
-                <p><strong>Vehicle:</strong> ${
-                  populatedSession.vehicle.licensePlate
-                }</p>
-                <p><strong>Entry Time:</strong> ${format(
-                  newEntryTime,
-                  "PPPp"
-                )}</p>
-                <p><strong>Expected Exit Time:</strong> ${format(
-                  newExitTime,
-                  "PPPp"
-                )}</p>
-                <p><strong>Estimated Duration:</strong> ${estimatedDurationHours.toFixed(
-                  1
-                )} hours</p>
-                <p><strong>Estimated Amount:</strong> $${estimatedAmount.toFixed(
-                  2
-                )}</p>
-                <p>Please note: The final amount will be calculated upon exit based on actual duration.</p>
-                <p>Thank you for using UniPark!</p>
-            `,
+        <h1>Your Parking ${
+          sessionStatus === "ACTIVE"
+            ? "Session has Started!"
+            : "Booking is Confirmed!"
+        }</h1>
+        <p>Hello ${req.user.name},</p>
+        <p>Your parking spot has been successfully ${
+          sessionStatus === "ACTIVE" ? "occupied" : "reserved"
+        }.</p>
+        <p><strong>Session ID:</strong> ${populatedSession._id}</p>
+        <p><strong>Parking Slot:</strong> ${
+          populatedSession.parkingSlot.slotId
+        } in ${populatedSession.parkingSlot.parkingZone.name}</p>
+        <p><strong>Vehicle:</strong> ${
+          populatedSession.vehicle.licensePlate
+        }</p>
+        <p><strong>Entry Time:</strong> ${moment(newEntryTime).format(
+          "MMMM Do YYYY, h:mm a"
+        )}</p>
+        <p><strong>Expected Exit Time:</strong> ${moment(newExitTime).format(
+          "MMMM Do YYYY, h:mm a"
+        )}</p>
+        <p><strong>Estimated Duration:</strong> ${estimatedDurationHours.toFixed(
+          1
+        )} hours</p>
+        <p><strong>Estimated Amount:</strong> $${estimatedAmount.toFixed(2)}</p>
+        <p>Please note: The final amount will be calculated upon exit based on actual duration.</p>
+        <p>Thank you for using UniPark!</p>
+      `,
     });
 
     await Log.create({
@@ -227,17 +238,18 @@ const startParkingSession = async (req, res) => {
   }
 };
 
-// @desc    End a parking session
-// @route   POST /api/parking-sessions/:id/end
-// @access  Private
+// @desc    End a parking session
+// @route   POST /api/parking-sessions/:id/end
+// @access  Private
 const endParkingSession = async (req, res) => {
   const sessionId = req.params.id;
   const { actualExitTime: requestedExitTime } = req.body;
   const actualExitTime = requestedExitTime
-    ? new Date(requestedExitTime)
-    : new Date();
+    ? moment(requestedExitTime)
+    : moment();
 
-  if (!isValid(actualExitTime)) {
+  // Use moment to validate date
+  if (!actualExitTime.isValid()) {
     return res
       .status(400)
       .json({ message: "Invalid actual exit time provided." });
@@ -245,7 +257,7 @@ const endParkingSession = async (req, res) => {
 
   try {
     const session = await ParkingSession.findById(sessionId) // Use ParkingSession
-      .populate("parkingSlot")
+      .populate({ path: "parkingSlot", populate: { path: "parkingZone" } })
       .populate("vehicle")
       .populate("user");
 
@@ -265,7 +277,8 @@ const endParkingSession = async (req, res) => {
         .status(400)
         .json({ message: "Session already ended or cancelled." });
     }
-    if (actualExitTime < session.entryTime) {
+    // Use moment to compare dates
+    if (actualExitTime.isBefore(session.entryTime)) {
       return res
         .status(400)
         .json({ message: "Actual exit time cannot be before entry time." });
@@ -285,11 +298,21 @@ const endParkingSession = async (req, res) => {
 
     const invoice = await Invoice.findById(session.invoice);
     if (invoice) {
-      invoice.amount = session.durationHours * session.parkingSlot.pricePerHour;
+      // Use moment to recalculate duration and final amount
+      const finalDurationHours = moment
+        .duration(actualExitTime.diff(moment(session.entryTime)))
+        .asHours();
+      invoice.amount = finalDurationHours * session.parkingSlot.pricePerHour;
       await invoice.save();
     }
 
     await session.save();
+
+    const paymentUrl = await stripeController.createCheckoutSession({
+      invoiceId: invoice._id.toString(),
+      amount: invoice.amount,
+      description: `Parking at ${session.parkingSlot.parkingZone.address} for slot ${session.parkingSlot.slotId}`,
+    });
 
     await Log.create({
       action: "Parking Session Ended",
@@ -303,11 +326,12 @@ const endParkingSession = async (req, res) => {
     });
 
     res.json({
-      message: "Parking session ended successfully.",
+      message: "Parking session ended successfully.Redirecting to payment.",
       session: await session.populate({
         path: "invoice",
         populate: { path: "paymentStatus" },
       }),
+      paymentUrl: paymentUrl,
     });
   } catch (error) {
     console.error("Error ending parking session:", error);
@@ -317,9 +341,9 @@ const endParkingSession = async (req, res) => {
   }
 };
 
-// @desc    Get parking sessions for the current authenticated user
-// @route   GET /api/parking-sessions/my
-// @access  Private
+// @desc    Get parking sessions for the current authenticated user
+// @route   GET /api/parking-sessions/my
+// @access  Private
 const getUserParkingSessions = async (req, res) => {
   try {
     const sessions = await ParkingSession.find({ user: req.user._id }) // Use ParkingSession
@@ -336,9 +360,9 @@ const getUserParkingSessions = async (req, res) => {
   }
 };
 
-// @desc    Get a single parking session by ID
-// @route   GET /api/parking-sessions/:id
-// @access  Private
+// @desc    Get a single parking session by ID
+// @route   GET /api/parking-sessions/:id
+// @access  Private
 const getParkingSessionById = async (req, res) => {
   try {
     const session = await ParkingSession.findById(req.params.id) // Use ParkingSession
@@ -365,9 +389,9 @@ const getParkingSessionById = async (req, res) => {
   }
 };
 
-// @desc    Get all parking sessions (Admin only)
-// @route   GET /api/admin/parking-sessions/all
-// @access  Private/Admin
+// @desc    Get all parking sessions (Admin only)
+// @route   GET /api/admin/parking-sessions/all
+// @access  Private/Admin
 const getAllParkingSessions = async (req, res) => {
   try {
     const sessions = await ParkingSession.find({}) // Use ParkingSession
