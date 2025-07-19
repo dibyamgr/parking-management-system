@@ -34,9 +34,20 @@ L.Icon.Default.mergeOptions({
 function SearchResultsPage() {
   const location = useLocation();
   const searchResults = location.state?.searchResults || [];
+  const { arrivingDate, arrivingTime, leavingTime } = location.state?.searchParams || {};
 
   const getLatLngFromSlot = (slot) => {
     return [slot.parkingZone.location.latitude, slot.parkingZone.location.longitude];
+  };
+
+  const handleBookClick = (slot) => {
+    // Navigate to the booking page, passing the required info
+    navigate(
+      `/book/${slot.slotId}?date=${arrivingDate}&startTime=${arrivingTime}&endTime=${leavingTime}`,
+      {
+        state: { parkingSlot: slot },
+      }
+    );
   };
 
   if (searchResults.length === 0) {
@@ -106,6 +117,7 @@ function SearchResultsPage() {
                   sx={{ mt: 1 }}
                   disabled={slot.status !== "AVAILABLE"}
                   width="20%"
+                  onClick={() => handleBookClick(slot)}
                 >
                   Book
                 </MDButton>

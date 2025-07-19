@@ -173,7 +173,9 @@ function FindParkingPage() {
 
     try {
       const searchResults = await parkingSlotsService.searchParkingSlots(searchParams);
-      navigate("/search-results", { state: { searchResults } });
+      navigate("/search-results", {
+        state: { searchResults, searchParams },
+      });
     } catch (error) {
       console.error("Search error:", error);
       alert("An error occurred during the search. Please try again.");
