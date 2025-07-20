@@ -1,3 +1,4 @@
+const ParkingSlot = require("../models/ParkingSlot");
 const ParkingZone = require("../models/ParkingZone");
 
 const getParkingZones = async (req, res) => {
@@ -140,10 +141,96 @@ const deleteParkingZone = async (req, res) => {
   }
 };
 
+// A simple helper function to calculate distance using the Haversine formula
+function getDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371e3; // Earth's radius in meters
+  const φ1 = (lat1 * Math.PI) / 180; // φ, λ in radians
+  const φ2 = (lat2 * Math.PI) / 180;
+  const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+  const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+
+  const a =
+    Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+    Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  const distance = R * c; // in meters
+  return distance;
+}
+
+const getNearbyParkingZones = async (req, res) => {
+  const { lat, lng, radius } = req.query;
+  console.log("Received nearby parking zones request:", lat, lng, radius);
+
+  if (!lat || !lng || !radius) {
+    return res
+      .status(400)
+      .json({ message: "Latitude, longitude, and radius are required." });
+  }
+
+  const latitude = parseFloat(lat);
+  const longitude = parseFloat(lng);
+  const searchRadius = parseFloat(radius);
+
+  if (isNaN(latitude) || isNaN(longitude) || isNaN(searchRadius)) {
+    return res
+      .status(400)
+      .json({ message: "Invalid latitude, longitude, or radius." });
+  }
+
+  try {
+    // Fetch ALL parking zones from the database
+    const allZones = await ParkingZone.find({});
+    console.log(allZones, "allZones===");
+
+    // Manually filter the zones based on distance
+    const nearbyZones = allZones.filter((zone) => {
+      if (zone.location) {
+        const distance = getDistance(
+          latitude,
+          longitude,
+          zone.location.latitude,
+          zone.location.longitude
+        );
+        console.log(distance, "distance===");
+        return distance <= searchRadius;
+      }
+      return false;
+    });
+
+    // Find available slots for each nearby zone
+    const zonesWithSlots = await Promise.all(
+      nearbyZones.map(async (zone) => {
+        const availableSlots = await ParkingSlot.find({
+          parkingZone: zone._id,
+          status: "AVAILABLE",
+        }).lean();
+
+        return {
+          ...zone.toObject(),
+          slots: availableSlots,
+        };
+      })
+    );
+
+    if (zonesWithSlots.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No nearby parking zones found." });
+    }
+
+    res.status(200).json(zonesWithSlots);
+  } catch (error) {
+    console.error("Geospatial query error:", error);
+    res.status(500).json({ message: "Server error during location search." });
+  }
+};
+
 module.exports = {
   getParkingZones,
   getParkingZoneById,
   createParkingZone,
   updateParkingZone,
   deleteParkingZone,
+  getNearbyParkingZones,
 };

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 // @mui material components
 import { Grid, Card } from "@mui/material";
@@ -33,8 +33,10 @@ L.Icon.Default.mergeOptions({
 
 function SearchResultsPage() {
   const location = useLocation();
+  console.log(location.state, "Location state in SearchResultsPage");
   const searchResults = location.state?.searchResults || [];
-  const { arrivingDate, arrivingTime, leavingTime } = location.state?.searchParams || {};
+  const { date, arrivalTime, exitTime } = location.state?.searchParams || {};
+  const navigate = useNavigate();
 
   const getLatLngFromSlot = (slot) => {
     return [slot.parkingZone.location.latitude, slot.parkingZone.location.longitude];
@@ -42,12 +44,9 @@ function SearchResultsPage() {
 
   const handleBookClick = (slot) => {
     // Navigate to the booking page, passing the required info
-    navigate(
-      `/book/${slot.slotId}?date=${arrivingDate}&startTime=${arrivingTime}&endTime=${leavingTime}`,
-      {
-        state: { parkingSlot: slot },
-      }
-    );
+    navigate(`/book/${slot.slotId}?date=${date}&startTime=${arrivalTime}&endTime=${exitTime}`, {
+      state: { parkingSlot: slot },
+    });
   };
 
   if (searchResults.length === 0) {

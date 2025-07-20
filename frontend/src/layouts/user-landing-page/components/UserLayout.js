@@ -51,7 +51,9 @@ function UserLayout({ coverHeight, image, children }) {
           backgroundRepeat: "no-repeat",
         }}
       >
-        {children}
+        <MDBox m={10} style={{ height: "auto" }}>
+          {children}
+        </MDBox>
       </MDBox>
 
       <Footer />

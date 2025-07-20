@@ -10,6 +10,7 @@ const vehicleRoutes = require("./routes/vehicleRoutes");
 const parkingSessionRoutes = require("./routes/parkingSessionRoutes");
 const invoiceRoutes = require("./routes/invoiceRoutes");
 const paymentStatusRoutes = require("./routes/paymentStatusRoutes");
+const webhookRoutes = require("./routes/webhookRoutes");
 
 dotenv.config();
 
@@ -17,6 +18,9 @@ const app = express();
 
 // Middlewares
 app.use(cors());
+
+app.use("/api/webhooks", webhookRoutes);
+
 app.use(express.json());
 
 // Connect to MongoDB

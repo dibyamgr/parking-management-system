@@ -35,6 +35,10 @@ import Invoices from "layouts/invoices";
 import FindParkingPage from "layouts/user-landing-page/find-parking";
 import FindNearbyParkingZones from "layouts/user-landing-page/find-nearby-parking-zones";
 import SearchResultsPage from "layouts/user-landing-page/searchResults";
+import BookingPage from "layouts/user-landing-page/booking";
+import BookingsList from "layouts/user-landing-page/booking/BookingsList";
+import PaymentSucess from "layouts/user-landing-page/payment/PaymentSuccess";
+import Invoice from "layouts/user-landing-page/invoice-billing";
 
 const routes = [
   {
@@ -170,6 +174,43 @@ const routes = [
     key: "search-results",
     route: "/search-results",
     component: <SearchResultsPage />,
+    layout: "user-public",
+    noCollapse: true,
+  },
+  {
+    type: "route",
+    name: "Search Results",
+    key: "search-results",
+    route: "/book/:parkingSlotId",
+    component: <BookingPage />,
+    layout: "user-public",
+    noCollapse: true,
+  },
+  {
+    type: "route",
+    name: "My Bookings",
+    key: "my-bookings",
+    route: "/my-bookings",
+    component: <BookingsList />,
+    layout: "user-public",
+    noCollapse: true,
+  },
+
+  {
+    type: "route",
+    name: "Payment Success",
+    key: "payment-success",
+    route: "/payment-success/:invoiceId",
+    component: <PaymentSucess />,
+    layout: "user-public",
+    noCollapse: true,
+  },
+  {
+    type: "route",
+    name: "Invoice Billing",
+    key: "invoice-billing",
+    route: "/invoices/:invoiceId",
+    component: <Invoice />,
     layout: "user-public",
     noCollapse: true,
   },
