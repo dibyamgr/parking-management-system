@@ -1,0 +1,646 @@
+{
+  "info": {
+    "_postman_id": "db0f8b1f-2a0e-4b01-8983-a272d73253ca",
+    "name": "Parking Management System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "18814996"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "REGISTER",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer",
+                "type": "text",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"ADMIN\",\r\n    \"email\": \"admin@gmail.com\",\r\n    \"password\": \"123456\",\r\n    \"role\": \"ADMIN\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/auth/register",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "auth", "register"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "LOGIN",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer",
+                "type": "text",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"admin@gmail.com\",\r\n    \"password\": \"123456\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/auth/login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Profile",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzMwZjRmNjU1MzA1NmE3ZjE5NjlhYyIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc1MjM3MTAzNiwiZXhwIjoxNzU0OTYzMDM2fQ.Ekkc9cXZ8NBx5nM3yojGW7wwNkQ5HIPfC66xHCJ3TG4",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Dibya RS Magar\",\r\n    \"email\": \"drsarumagar@mun.ca\",\r\n    \"password\": \"123456\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/auth/profile",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "auth", "profile"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Parking zones",
+      "item": [
+        {
+          "name": "Create Parking Zone",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzMwZjRmNjU1MzA1NmE3ZjE5NjlhYyIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc1MjM3MTAzNiwiZXhwIjoxNzU0OTYzMDM2fQ.Ekkc9cXZ8NBx5nM3yojGW7wwNkQ5HIPfC66xHCJ3TG4",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"zoneId\": \"1001\",\r\n    \"name\": \"Test 1 City Hall Garage\",\r\n    \"address\": \"10 New Gower St, Downtown, St.John's\",\r\n    \"latitude\": 47.5639,\r\n    \"longitude\": -52.7151,\r\n    \"description\": \"Underground parking at St. John's City Hall.\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/parking-zones",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "parking-zones"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Parking Zone",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzMwZjRmNjU1MzA1NmE3ZjE5NjlhYyIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc1MjM3MTAzNiwiZXhwIjoxNzU0OTYzMDM2fQ.Ekkc9cXZ8NBx5nM3yojGW7wwNkQ5HIPfC66xHCJ3TG4",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"zoneId\": \"1301\",\r\n    \"name\": \"City Hall Garage\",\r\n    \"address\": \"10 New Gower St, Downtown, St.John's\",\r\n    \"latitude\": 47.5639,\r\n    \"longitude\": -52.7151,\r\n    \"description\": \"Underground parking at St. John's City Hall.\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/parking-zones/1301",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "parking-zones", "1301"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Parking Zone by Id",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzMwZjRmNjU1MzA1NmE3ZjE5NjlhYyIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc1MjM3MTAzNiwiZXhwIjoxNzU0OTYzMDM2fQ.Ekkc9cXZ8NBx5nM3yojGW7wwNkQ5HIPfC66xHCJ3TG4",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/parking-zones/1301",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "parking-zones", "1301"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get all Parking Zones",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzMwZjRmNjU1MzA1NmE3ZjE5NjlhYyIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc1MjM3MTAzNiwiZXhwIjoxNzU0OTYzMDM2fQ.Ekkc9cXZ8NBx5nM3yojGW7wwNkQ5HIPfC66xHCJ3TG4",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"zoneId\": \"1301\",\r\n    \"name\": \"City Hall Garage\",\r\n    \"address\": \"10 New Gower St, Downtown, St.John's\",\r\n    \"latitude\": 47.5639,\r\n    \"longitude\": -52.7151,\r\n    \"description\": \"Underground parking at St. John's City Hall.\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/parking-zones",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "parking-zones"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "ParkingSlots",
+      "item": [
+        {
+          "name": "Search Slots",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_AUTH_TOKEN"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/parking-slots?slotType=REGULAR&zoneId=1301&status=AVAILABLE",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "parking-slots"],
+              "query": [
+                {
+                  "key": "slotType",
+                  "value": "REGULAR"
+                },
+                {
+                  "key": "zoneId",
+                  "value": "1301"
+                },
+                {
+                  "key": "status",
+                  "value": "AVAILABLE"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Slots",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzMwZjRmNjU1MzA1NmE3ZjE5NjlhYyIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc1MjM3MTAzNiwiZXhwIjoxNzU0OTYzMDM2fQ.Ekkc9cXZ8NBx5nM3yojGW7wwNkQ5HIPfC66xHCJ3TG4"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"slotId\": \"UNIPARK-A01\",\n    \"parkingZoneId\": \"1301\",\n    \"slotType\": \"REGULAR\",\n    \"pricePerHour\": 2.50\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/parking-slots",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "parking-slots"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update/Delete Slots",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzMwZjRmNjU1MzA1NmE3ZjE5NjlhYyIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc1MjM3MTAzNiwiZXhwIjoxNzU0OTYzMDM2fQ.Ekkc9cXZ8NBx5nM3yojGW7wwNkQ5HIPfC66xHCJ3TG4"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"pricePerHour\": 3.00,\n    \"status\": \"MAINTENANCE\",\n    \"isAvailable\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/parking-slots/UNIPARK-A02",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "parking-slots", "UNIPARK-A02"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get parking slot by Id",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_AUTH_TOKEN"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/parking-slots/UNIPARK-A01",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "parking-slots", "UNIPARK-A01"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Vehicles",
+      "item": [
+        {
+          "name": "Register Vehicle",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzMwZjRmNjU1MzA1NmE3ZjE5NjlhYyIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc1MjM3MTAzNiwiZXhwIjoxNzU0OTYzMDM2fQ.Ekkc9cXZ8NBx5nM3yojGW7wwNkQ5HIPfC66xHCJ3TG4"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"licensePlate\": \"XYZ-987\",\n    \"vehicleType\": \"CAR\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/vehicles",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "vehicles"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Parking Session",
+      "item": [
+        {
+          "name": "Start Parking Sessions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzMwZjRmNjU1MzA1NmE3ZjE5NjlhYyIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc1MjQ1NDIwNCwiZXhwIjoxNzU1MDQ2MjA0fQ.vFFFPdK3DUarQ4tCBB5xrJ2Hrd_9EgzS6SfhsMsjcgY"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"parkingSlotId\": \"UNIPARK-A01\",\n    \"vehicleId\": \"XYZ-987\",\n    \"startTime\": \"2025-07-15T14:00:00Z\",\n    \"endTime\": \"2025-07-15T16:00:00Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/parking-sessions/start",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "parking-sessions", "start"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "End Parking Session",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzMwZjRmNjU1MzA1NmE3ZjE5NjlhYyIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc1MjQ1MjE0NSwiZXhwIjoxNzU1MDQ0MTQ1fQ.F0eCmC5DhLA_IlINKE3Nn_LeRLNgEwhXsWo_3bftKh8"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"actualExitTime\": \"2025-07-14T22:37:00Z\" \n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:5000/api/parking-sessions/68744ec4555c1a882d938c20/end",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": [
+                "api",
+                "parking-sessions",
+                "68744ec4555c1a882d938c20",
+                "end"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Parking Session",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzMwZjRmNjU1MzA1NmE3ZjE5NjlhYyIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc1MjQ1MjE0NSwiZXhwIjoxNzU1MDQ0MTQ1fQ.F0eCmC5DhLA_IlINKE3Nn_LeRLNgEwhXsWo_3bftKh8"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/parking-sessions/my",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "parking-sessions", "my"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Parking Sessions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzMwZjRmNjU1MzA1NmE3ZjE5NjlhYyIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc1MjQ1MjE0NSwiZXhwIjoxNzU1MDQ0MTQ1fQ.F0eCmC5DhLA_IlINKE3Nn_LeRLNgEwhXsWo_3bftKh8"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/parking-sessions/admin/all",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "parking-sessions", "admin", "all"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Invoices",
+      "item": [
+        {
+          "name": "Get My Invoice",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzMwZjRmNjU1MzA1NmE3ZjE5NjlhYyIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc1MjQ1NDIwNCwiZXhwIjoxNzU1MDQ2MjA0fQ.vFFFPdK3DUarQ4tCBB5xrJ2Hrd_9EgzS6SfhsMsjcgY"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/invoices/my",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "invoices", "my"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Invoice By Id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzMwZjRmNjU1MzA1NmE3ZjE5NjlhYyIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc1MjQ1NDIwNCwiZXhwIjoxNzU1MDQ2MjA0fQ.vFFFPdK3DUarQ4tCBB5xrJ2Hrd_9EgzS6SfhsMsjcgY",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/invoices/68744ec4555c1a882d938c23",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "invoices", "68744ec4555c1a882d938c23"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Pay Invoice",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzMwZjRmNjU1MzA1NmE3ZjE5NjlhYyIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc1MjQ1NDIwNCwiZXhwIjoxNzU1MDQ2MjA0fQ.vFFFPdK3DUarQ4tCBB5xrJ2Hrd_9EgzS6SfhsMsjcgY"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/invoices/68744ec4555c1a882d938c23/pay",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "invoices", "68744ec4555c1a882d938c23", "pay"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Invoice - Admin",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzMwZjRmNjU1MzA1NmE3ZjE5NjlhYyIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc1MjQ1NDIwNCwiZXhwIjoxNzU1MDQ2MjA0fQ.vFFFPdK3DUarQ4tCBB5xrJ2Hrd_9EgzS6SfhsMsjcgY"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/invoices/admin/all",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "invoices", "admin", "all"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Payment Status",
+      "item": [
+        {
+          "name": "Get Payment Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NzMwZjRmNjU1MzA1NmE3ZjE5NjlhYyIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc1MjQ1NDIwNCwiZXhwIjoxNzU1MDQ2MjA0fQ.vFFFPdK3DUarQ4tCBB5xrJ2Hrd_9EgzS6SfhsMsjcgY"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5000/api/admin/payment-statuses/admin",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5000",
+              "path": ["api", "admin", "payment-statuses", "admin"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
