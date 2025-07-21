@@ -83,10 +83,10 @@ function PaymentSuccessPage() {
             >
               <img src={BookingSuccessGIF} alt="Booking Success" width={80} height={80} />
               <MDTypography variant="h3" mt={2} mb={1} fontWeight="bold">
-                Thank you!
+                Thank you for parking with us!
               </MDTypography>
               <MDTypography variant="h5" color="text" fontWeight="bold">
-                Your booking has been confirmed.
+                Your payment has been confirmed.
               </MDTypography>
             </MDBox>
 
@@ -138,13 +138,13 @@ function PaymentSuccessPage() {
               <MDTypography variant="body2" mb={0.5} sx={{ fontWeight: "bold" }}>
                 Arriving on:{" "}
                 <MDTypography component="span" variant="body2">
-                  {moment(invoice?.parkingSession?.entryTime).format("MMMM Do YYYY, h:mm a")}
+                  {moment(invoice?.parkingSession?.entryTime).utc().format("MMMM Do YYYY, h:mm a")}
                 </MDTypography>
               </MDTypography>
               <MDTypography variant="body2" mb={0.5} sx={{ fontWeight: "bold" }}>
                 Leaving on:{" "}
                 <MDTypography component="span" variant="body2">
-                  {moment(invoice?.parkingSession?.exitTime).format("MMMM Do YYYY, h:mm a")}
+                  {moment(invoice?.parkingSession?.exitTime).utc().format("MMMM Do YYYY, h:mm a")}
                 </MDTypography>
               </MDTypography>
               <MDTypography variant="body2" sx={{ fontWeight: "bold" }}>
