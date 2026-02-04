@@ -1,53 +1,59 @@
 const mongoose = require("mongoose");
 
-const parkingZoneSchema = mongoose.Schema(
+const parkingZoneSchema = new mongoose.Schema(
   {
     zoneId: {
-      // Unique identifier for the zone (e.g., "ZONE-A")
       type: String,
       required: true,
       unique: true,
+      trim: true,
     },
     name: {
       type: String,
       required: true,
+      trim: true,
     },
     address: {
       type: String,
       required: true,
     },
     location: {
-      // Embedded Location schema
-      latitude: {
-        type: Number,
+      type: {
+        type: String,
+        enum: ["Point"],
         required: true,
+        default: "Point",
       },
-      longitude: {
-        type: Number,
+      coordinates: {
+        type: [Number], // [longitude, latitude]
         required: true,
+        validate: {
+          validator: function (value) {
+            return value.length === 2 &&
+              typeof value[0] === "number" &&
+              typeof value[1] === "number";
+          },
+          message: "Coordinates must be [longitude, latitude]",
+        },
       },
     },
     description: {
       type: String,
+      default: "",
     },
     totalSlots: {
-      // Derived/Updated by logic that counts associated ParkingSlots
       type: Number,
       default: 0,
     },
     availableSlots: {
-      // Derived/Updated by logic
       type: Number,
       default: 0,
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-// Create 2dsphere index for geospatial queries
+// Enable geospatial querying with 2dsphere index
 parkingZoneSchema.index({ location: "2dsphere" });
 
-const ParkingZone = mongoose.model("ParkingZone", parkingZoneSchema);
-module.exports = ParkingZone;
+module.exports = mongoose.model("ParkingZone", parkingZoneSchema);

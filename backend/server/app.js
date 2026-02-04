@@ -1,37 +1,21 @@
-const mongoose = require("mongoose");
+// backend/server/app.js
 const express = require("express");
-const app = require("./app");
-const dotenv = require("dotenv");
 const cors = require("cors");
+const dotenv = require("dotenv");
 const authRoutes = require("./routes/authRoutes");
 const parkingZonesRoutes = require("./routes/parkingZoneRoutes");
 const parkingSlotRoutes = require("./routes/parkingSlotRoutes");
 const vehicleRoutes = require("./routes/vehicleRoutes");
 const parkingSessionRoutes = require("./routes/parkingSessionRoutes");
 const invoiceRoutes = require("./routes/invoiceRoutes");
+const logRoutes = require('./routes/logRoutes');
 const paymentStatusRoutes = require("./routes/paymentStatusRoutes");
-const webhookRoutes = require("./routes/webhookRoutes");
 
 dotenv.config();
 
 const app = express();
-
-// Middlewares
 app.use(cors());
-
-app.use("/api/webhooks", webhookRoutes);
-
 app.use(express.json());
-
-// Connect to MongoDB
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => {
-    console.log("MongoDB connected successfully");
-  })
-  .catch((error) => {
-    console.error("MongoDB connection error:", error);
-  });
 
 // Routes
 app.use("/api/auth", authRoutes);
@@ -40,10 +24,7 @@ app.use("/api/parking-slots", parkingSlotRoutes);
 app.use("/api/vehicles", vehicleRoutes);
 app.use("/api/parking-sessions", parkingSessionRoutes);
 app.use("/api/invoices", invoiceRoutes);
-app.use("/api/admin/payment-statuses", paymentStatusRoutes);
+app.use('/api/logs', logRoutes);
+app.use("/api/payment-statuses", paymentStatusRoutes);
 
-// Port
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚗 Parking server running on port ${PORT}`);
-});
+module.exports = app;

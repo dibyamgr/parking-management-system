@@ -61,7 +61,10 @@ const createParkingZone = async (req, res) => {
       zoneId,
       name,
       address,
-      location: { latitude, longitude },
+      location: { 
+        type: "Point",
+        coordinates: [longitude, latitude],
+      },
       description,
     });
     // await Log.create({
@@ -90,8 +93,12 @@ const updateParkingZone = async (req, res) => {
     if (zone) {
       zone.name = name || zone.name;
       zone.address = address || zone.address;
-      if (latitude !== undefined) zone.location.latitude = latitude;
-      if (longitude !== undefined) zone.location.longitude = longitude;
+      if (latitude !== undefined && longitude !== undefined) {
+        zone.location = {
+          type: "Point",
+          coordinates: [longitude, latitude],
+      };
+      }
       zone.description = description || zone.description;
       const updatedZone = await zone.save();
       //   await Log.create({
